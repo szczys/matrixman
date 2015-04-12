@@ -66,8 +66,8 @@ int main(int argn, char **argv)
     for (i = 0; i < 32; i++) {
         printf("Loop %d\n",i);
         for (uint16_t j = 0; j<32; j++) {
-            if (board[i] & (1<<j)) {
-                displayPixel(31-j, i, 0, 0, 255); //Invert the x (big endian)
+            if (board[i] & (1<<(31-j))) {    //Invert the x (big endian)
+                displayPixel(j, i, 0, 0, 255); 
             }
         }        
     }
@@ -76,6 +76,7 @@ int main(int argn, char **argv)
     displayPixel(myGuy.x, myGuy.y, 255, 255, 0);
 
     //pause
+    SDL_Delay(250);
     
     //move player
 
