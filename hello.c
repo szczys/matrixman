@@ -11,7 +11,7 @@ SDL_Renderer *ren;
 struct Player { 
     uint8_t x;
     uint8_t y;
-    uint8_t speed;
+    int8_t speed;
     uint8_t dirIsHor; // non-zero if moving in a horizontal direction
 };
 
@@ -61,29 +61,33 @@ uint8_t canMove(uint8_t nextX, uint8_t nextY) {
 }
 
 void movePlayer(struct Player *pawn) {
-    /*
-    uint8_t testX = pawn.x;
-    uint8_t testY = pawn.y;
-    if (myGuy.dirIsHor) {
-        if (myGuy.speed > 0) { testX = myGuy1; }
-        else { testX -= 1; }
-        testY = myGuy.y;
+    uint8_t testX = pawn->x;
+    uint8_t testY = pawn->y;
+
+    if (pawn->dirIsHor) {
+        if (pawn->speed > 0) { testX++; }
+        else { testX--; }
     }
     else {
-        if (myGuy.speed > 0) { testY += 1; }
-        else { testY
+        if (pawn->speed > 0) { testY++; }
+        else { testY--; }
     }
-    */
+
     //is next space unoccupied?
-    //TODO: Add code for moving direction (currently assumpe moving to the right
-    if (canMove(pawn->x+1, pawn->y)) {
+    if (canMove(testX, testY)) {
         //erase player at current spot
         displayPixel(pawn->x, pawn->y, 0, 0, 0);
         //increment player position
-        pawn->x += 1;
+        pawn->x = testX;
+        pawn->y = testY; 
         //redraw player at new spot
         displayPixel(pawn->x, pawn->y, 255, 255, 0);
         SDL_RenderPresent(ren);
+    }
+    //TODO: Remove this else statement (just for testing)
+    else {
+        if (pawn->speed < 0) pawn->speed = 10;
+        else pawn->speed = -10;
     }
 }
 
@@ -95,10 +99,11 @@ int main(int argn, char **argv)
 
     myGuy.x = 15;
     myGuy.y = 23;
-    myGuy.speed = 10; //Unused for now
+    myGuy.speed = 10; //Currently only used for determining -/+ of movement
     myGuy.dirIsHor = 1;
     
     initDisplay();
+    
     uint16_t i;
     for (i = 0; i < 32; i++) {
         printf("Loop %d\n",i);
@@ -112,13 +117,13 @@ int main(int argn, char **argv)
     //Draw the player
     displayPixel(myGuy.x, myGuy.y, 255, 255, 0);
     SDL_RenderPresent(ren);
+    
 
     while(1) {
         //TODO: Take input from human for dir changes
-
-        //pause
         SDL_Delay(250);
-    
+        //pause
+
         //move player
         movePlayer(&myGuy);
         
