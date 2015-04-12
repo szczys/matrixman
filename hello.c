@@ -91,7 +91,45 @@ void movePlayer(struct Player *pawn) {
     }
 }
 
+void routeChoice(struct Player *pawn) {
+    //Does the pawn have a choice of routes right now?
+    uint8_t testX = pawn->x;
+    uint8_t testY = pawn->y;
 
+    //TODO: Route taking is currently arbitrary (turn if there's the opportunity)
+    if (pawn->dirIsHor) {
+        if (pawn->speed > 0) {
+            //Currently moving right
+            if (canMove(testX, testY-1)) {
+                pawn->dirIsHor = 0;                
+                pawn->speed = -10;
+            }
+            else if (canMove(testX, testY+1)) {
+                pawn->dirIsHor = 0;                
+                pawn->speed = 10;
+            }
+        }
+        else {
+            //Currently moving left
+        }
+    }
+    else {
+        if (pawn->speed > 0) {
+            //Currently moving up
+            if (canMove(testX-1, testY)) {
+                pawn->dirIsHor = 1;                
+                pawn->speed = -10;
+            }
+            else if (canMove(testX+1, testY)) {
+                pawn->dirIsHor = 1;                
+                pawn->speed = 10;
+            }
+        }
+        else {
+            //Currently moving down
+        }
+    }
+}
 
 int main(int argn, char **argv)
 {
@@ -119,13 +157,17 @@ int main(int argn, char **argv)
     SDL_RenderPresent(ren);
     
 
+    
+
     while(1) {
         //TODO: Take input from human for dir changes
         SDL_Delay(250);
         //pause
 
+        routeChoice(&myGuy);
         //move player
         movePlayer(&myGuy);
+        
         
     }
 
