@@ -3,7 +3,7 @@ test:
 	make run;
 
 build:
-	gcc -c hello.c;
+	gcc -std=c99 -c hello.c;
 	gcc hello.o -lSDL2 -o hello;
 
 run:
