@@ -7,6 +7,17 @@ void* nullptr;
 SDL_Window *win;
 SDL_Renderer *ren;
 
+//Player Variables
+struct Player { 
+    uint8_t x;
+    uint8_t y;
+    uint8_t speed;
+    uint8_t dirIsHor; // non-zero if moving in a horizontal direction
+};
+
+struct Player myGuy;
+
+
 void initDisplay(void) {
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -45,6 +56,11 @@ int main(int argn, char **argv)
 {
     printf("Hello world!\n");
 
+    myGuy.x = 15;
+    myGuy.y = 23;
+    myGuy.speed = 10; //Unused for now
+    myGuy.dirIsHor = 1;
+    
     initDisplay();
     uint16_t i;
     for (i = 0; i < 32; i++) {
@@ -55,6 +71,17 @@ int main(int argn, char **argv)
             }
         }        
     }
+
+    //Draw the player
+    displayPixel(myGuy.x, myGuy.y, 255, 255, 0);
+
+    //pause
+    
+    //move player
+
+    //detect collision
+
+    //redraw player
 
     SDL_RenderPresent(ren);
     SDL_Delay(10000);
