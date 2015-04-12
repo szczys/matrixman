@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
+#include "board.h"
 
 //SDL2 variables
 void* nullptr;
@@ -28,11 +29,11 @@ void displayClear(char r, char g, char b) {
     SDL_RenderClear(ren);
 }
 
-void displayPixel(char x, char y, char r, char g, char b) {
+void displayPixel(uint8_t x, uint8_t y, char r, char g, char b) {
     SDL_Rect rect;
     //Eventually these rectangles will just be LED pixels so this is arbitrary
-    rect.x = x;
-    rect.y = y;
+    rect.x = x*10;
+    rect.y = y*10;
     rect.w = 10;
     rect.h = 10;
 
@@ -48,12 +49,16 @@ int main(int argn, char **argv)
     uint16_t i;
     for (i = 0; i < 32; i++) {
         printf("Loop %d\n",i);
-        displayClear(255, 0, 0);
-        displayPixel(i*10, 0, 0, 0, 255);
-        SDL_RenderPresent(ren);
-
-        SDL_Delay(2000);
+        for (uint16_t j = 0; j<32; j++) {
+            if (board[i] & (1<<j)) {
+                displayPixel(31-j, i, 0, 0, 255); //Invert the x (big endian)
+            }
+        }        
     }
+
+    SDL_RenderPresent(ren);
+    SDL_Delay(10000);
+
     SDL_DestroyWindow(win);
     SDL_Quit();
 
