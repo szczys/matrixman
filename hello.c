@@ -17,6 +17,15 @@ struct Player {
 
 struct Player myGuy;
 
+//Enemy Data
+#define REDX 27
+#define REDY 0
+#define PINKX 4
+#define PINKY 0
+#define ORANGEX 2
+#define ORANGEY 31
+#define BLUEX 29
+#define BLUEY 31
 
 void initDisplay(void) {
 
@@ -91,6 +100,28 @@ void movePlayer(struct Player *pawn) {
     }
 }
 
+uint8_t getClosest(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t targetX, uint8_t targetY) {
+    //Takes two points and a target point
+    //returns 1 if first point is closer than second
+    //returns 2 if second point is closer than first
+    uint8_t hor1, hor2, ver1, ver2;
+    uint16_t sqD1, sqD2;
+    if (x1 < targetX) { hor1 = targetX-x1; }
+    else { hor1 = x1-targetX; }
+    if (y1 < targetY) { ver1 = targetY-y1; }
+    else { ver1 = y1-targetY; }
+    if (x2 < targetX) { hor2 = targetX-x2; }
+    else { hor2 = x2-targetX; }
+    if (y2 < targetY) { ver2 = targetY-y2; }
+    else { ver2 = y2-targetY; }
+
+    sqD1 = (hor1 * hor1) + (ver1 * ver1);
+    sqD2 = (hor2 * hor2) + (ver2 * ver2);
+
+    if (sqD2 > sqD1) { return 1; }
+    return 2;
+}
+
 void routeChoice(struct Player *pawn) {
     //Does the pawn have a choice of routes right now?
     uint8_t testX = pawn->x;
@@ -101,32 +132,64 @@ void routeChoice(struct Player *pawn) {
         if (pawn->speed > 0) {
             //Currently moving right
             if (canMove(testX, testY-1)) {
-                pawn->dirIsHor = 0;                
-                pawn->speed = -10;
+                if (getClosest(testX+1, testY, testX, testY-1, REDX, REDY) == 2) {
+                    pawn->dirIsHor = 0;                
+                    pawn->speed = -10;
+                }
             }
             else if (canMove(testX, testY+1)) {
-                pawn->dirIsHor = 0;                
-                pawn->speed = 10;
+                if (getClosest(testX+1, testY, testX, testY+1, REDX, REDY) == 2) {
+                    pawn->dirIsHor = 0;                
+                    pawn->speed = 10;
+                }
             }
         }
         else {
             //Currently moving left
+            if (canMove(testX, testY-1)) {
+                if (getClosest(testX-1, testY, testX, testY-1, REDX, REDY) == 2) {
+                    pawn->dirIsHor = 0;                
+                    pawn->speed = -10;
+                }
+            }
+            else if (canMove(testX, testY+1)) {
+                if (getClosest(testX-1, testY, testX, testY+1, REDX, REDY) == 2) {
+                    pawn->dirIsHor = 0;                
+                    pawn->speed = 10;
+                }
+            }
         }
     }
     else {
         if (pawn->speed > 0) {
             //Currently moving up
             if (canMove(testX-1, testY)) {
-                pawn->dirIsHor = 1;                
-                pawn->speed = -10;
+                if (getClosest(testX, testY+1, testX-1, testY, REDX, REDY) == 2) {
+                    pawn->dirIsHor = 1;                
+                    pawn->speed = -10;
+                }
             }
             else if (canMove(testX+1, testY)) {
-                pawn->dirIsHor = 1;                
-                pawn->speed = 10;
+                if (getClosest(testX, testY+1, testX+1, testY, REDX, REDY) == 2) {
+                    pawn->dirIsHor = 1;                
+                    pawn->speed = 10;
+                }
             }
         }
         else {
             //Currently moving down
+            if (canMove(testX-1, testY)) {
+                if (getClosest(testX, testY-1, testX-1, testY, REDX, REDY) == 2) {
+                    pawn->dirIsHor = 1;                
+                    pawn->speed = -10;
+                }
+            }
+            else if (canMove(testX+1, testY)) {
+                if (getClosest(testX, testY-1, testX+1, testY, REDX, REDY) == 2) {
+                    pawn->dirIsHor = 1;                
+                    pawn->speed = 10;
+                }
+            }
         }
     }
 }
