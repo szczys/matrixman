@@ -19,6 +19,7 @@ struct Player {
 };
 
 struct Player myGuy;
+struct Player enemy1;
 
 //Directions of travel
 #define UP      0
@@ -229,6 +230,7 @@ int main(int argn, char **argv)
 {
     printf("Hello world!\n");
 
+    //Set Player values
     myGuy.x = 15;
     myGuy.y = 23;
     myGuy.speed = 10; //Currently unused
@@ -236,6 +238,15 @@ int main(int argn, char **argv)
     myGuy.color = YELLOW;
     myGuy.tarX = ORANGEX;
     myGuy.tarY = ORANGEY;
+    
+    //Set Enemy values
+    enemy1.x = 15;
+    enemy1.y = 11;
+    enemy1.speed = 10; //Currently unused
+    enemy1.travelDir = RIGHT;
+    enemy1.color = RED;
+    enemy1.tarX = REDX;
+    enemy1.tarY = REDY;
     
     initDisplay();
     
@@ -300,10 +311,12 @@ int main(int argn, char **argv)
 
         /* This animates the game */        
         if (ticks++ > 250) {
-            //routeChoice(&myGuy); //This is for enemy movement
+            routeChoice(&enemy1); //This is for enemy movement
+            movePlayer(&enemy1);
 
             playerRoute(&myGuy, nextDir);        //see if player wanted direction change
             movePlayer(&myGuy); //move player
+            
 
             //TODO: Reset counter (this should be interrupts when in hardware
             ticks = 0;
