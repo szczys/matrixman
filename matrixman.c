@@ -9,14 +9,13 @@ SDL_Renderer *ren;
 
 //Player Variables
 struct Player { 
-    uint8_t x;
-    uint8_t y;
-    uint8_t tarX; //Target X coord. for enemy
-    uint8_t tarY; //Target Y coord. fo enemy
-    int8_t speed;
-    //uint8_t dirIsHor; // non-zero if moving in a horizontal direction
-    uint8_t travelDir;
-    uint8_t color;
+    uint8_t x;          //Position on the game surface, 0 is left
+    uint8_t y;          //Position on the game surface, 0 is top
+    uint8_t tarX;       //Target X coord. for enemy
+    uint8_t tarY;       //Target Y coord. for enemy
+    int8_t speed;       //Currently unused
+    uint8_t travelDir;  //Uses directional defines below
+    uint8_t color;      //Uses color defines below
 };
 
 struct Player myGuy;
@@ -206,10 +205,10 @@ void routeChoice(struct Player *pawn) {
             if (canMove(testX, testY+1)) { route2 = getDistance(testX, testY+1, pawn->tarX, pawn->tarY); }
             if (canMove(testX-1, testY)) { route3 = getDistance(testX-1, testY, pawn->tarX, pawn->tarY); }
             if ((route1 < route2) && (route1 < route3)) {
-                pawn->travelDir = UP;
+                pawn->travelDir = UP;   //TODO: apparently moving up is forbidden in original AI logic
             }
             else if ((route2 < route1) && (route2 < route3)) {
-                pawn->travelDir = DOWN;   //TODO: apparently moving up is forbidden in original AI logic
+                pawn->travelDir = DOWN;
             }
             break;
         case RIGHT:
@@ -217,10 +216,10 @@ void routeChoice(struct Player *pawn) {
             if (canMove(testX, testY+1)) { route2 = getDistance(testX, testY+1, pawn->tarX, pawn->tarY); }
             if (canMove(testX+1, testY)) { route3 = getDistance(testX+1, testY, pawn->tarX, pawn->tarY); }
             if ((route1 < route2) && (route1 < route3)) {
-                pawn->travelDir = UP;
+                pawn->travelDir = UP;   //TODO: apparently moving up is forbidden in original AI logic
             }
             else if ((route2 < route1) && (route2 < route3)) {
-                pawn->travelDir = DOWN;   //TODO: apparently moving up is forbidden in original AI logic
+                pawn->travelDir = DOWN;
             }
             break;
     }
@@ -233,7 +232,6 @@ int main(int argn, char **argv)
     myGuy.x = 15;
     myGuy.y = 23;
     myGuy.speed = 10; //Currently unused
-    //myGuy.dirIsHor = 1;
     myGuy.travelDir = RIGHT;
     myGuy.color = YELLOW;
     myGuy.tarX = ORANGEX;
