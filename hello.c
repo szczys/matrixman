@@ -13,6 +13,7 @@ struct Player {
     uint8_t y;
     int8_t speed;
     uint8_t dirIsHor; // non-zero if moving in a horizontal direction
+    uint8_t color;
 };
 
 struct Player myGuy;
@@ -26,6 +27,24 @@ struct Player myGuy;
 #define ORANGEY 31
 #define BLUEX 29
 #define BLUEY 31
+
+#define BLUE 0
+#define YELLOW 1
+#define RED 2
+#define PINK 3
+#define ORANGE 4
+#define CYAN 5
+#define BLACK 6
+
+static const uint8_t colors[][3] = {
+    { 0, 0, 255 },
+    { 255, 255, 0 },
+    { 255, 0, 0 },
+    { 0, 0, 0 },
+    { 0, 0, 0 },
+    { 0, 255, 255 },
+    { 0, 0, 0 }
+};
 
 void initDisplay(void) {
 
@@ -44,20 +63,20 @@ void initDisplay(void) {
     }
 }
 
-void displayClear(char r, char g, char b) {
-    SDL_SetRenderDrawColor(ren, r, g, b, 255);
+void displayClear(uint8_t color) {
+    SDL_SetRenderDrawColor(ren, colors[color][0], colors[color][1], colors[color][2], 255);
     SDL_RenderClear(ren);
 }
 
-void displayPixel(uint8_t x, uint8_t y, char r, char g, char b) {
+void displayPixel(uint8_t x, uint8_t y, char color) {
     SDL_Rect rect;
-    //Eventually these rectangles will just be LED pixels so this is arbitrary
+    //TODO: Eventually these rectangles will just be LED pixels so this number 10 is arbitrary
     rect.x = x*10;
     rect.y = y*10;
     rect.w = 10;
     rect.h = 10;
 
-    SDL_SetRenderDrawColor(ren, r, g, b, 255);
+    SDL_SetRenderDrawColor(ren, colors[color][0], colors[color][1], colors[color][2], 255);
     SDL_RenderFillRect(ren, &rect);
 }
 
@@ -85,12 +104,12 @@ void movePlayer(struct Player *pawn) {
     //is next space unoccupied?
     if (canMove(testX, testY)) {
         //erase player at current spot
-        displayPixel(pawn->x, pawn->y, 0, 0, 0);
+        displayPixel(pawn->x, pawn->y, BLACK);
         //increment player position
         pawn->x = testX;
         pawn->y = testY; 
         //redraw player at new spot
-        displayPixel(pawn->x, pawn->y, 255, 255, 0);
+        displayPixel(pawn->x, pawn->y, pawn->color);
         SDL_RenderPresent(ren);
     }
     //TODO: Remove this else statement (just for testing)
@@ -119,11 +138,13 @@ void routeChoice(struct Player *pawn) {
 
     //Set 3 distances then choose the shortest
     uint16_t route1, route2, route3;
+    //Set arbitrarily high distance numbers
     route1 = 6000;
     route2 = 6000;
     route3 = 6000;
 
     if (pawn->dirIsHor) {
+        //This block works when travel is horizontal
         if (canMove(testX, testY-1)) { route1 = getDistance(testX, testY-1, REDX, REDY); }
         if (canMove(testX, testY+1)) { route2 = getDistance(testX, testY+1, REDX, REDY); }
         if (pawn->speed > 0) { 
@@ -143,6 +164,7 @@ void routeChoice(struct Player *pawn) {
         }
     }
     else {
+        //This block works when travel is vertical
         if (canMove(testX-1, testY)) { route1 = getDistance(testX-1, testY, REDX, REDY); }
         if (canMove(testX+1, testY)) { route2 = getDistance(testX+1, testY, REDX, REDY); }
         if (pawn->speed > 0) {
@@ -171,6 +193,7 @@ int main(int argn, char **argv)
     myGuy.y = 23;
     myGuy.speed = 10; //Currently only used for determining -/+ of movement
     myGuy.dirIsHor = 1;
+    myGuy.color = YELLOW;
     
     initDisplay();
     
@@ -179,13 +202,13 @@ int main(int argn, char **argv)
         printf("Loop %d\n",i);
         for (uint16_t j = 0; j<32; j++) {
             if (board[i] & (1<<(31-j))) {    //Invert the x (big endian)
-                displayPixel(j, i, 0, 0, 255); 
+                displayPixel(j, i, BLUE); 
             }
         }        
     }
 
     //Draw the player
-    displayPixel(myGuy.x, myGuy.y, 255, 255, 0);
+    displayPixel(myGuy.x, myGuy.y, myGuy.color);
     SDL_RenderPresent(ren);
     
 
