@@ -215,23 +215,45 @@ int main(int argn, char **argv)
     displayPixel(myGuy.x, myGuy.y, myGuy.color);
     SDL_RenderPresent(ren);
     
+    SDL_Event event;
+    uint8_t gameRunning = 1;
+    uint16_t ticks = 0;
 
-    
-
-    while(1) {
-        //TODO: Take input from human for dir changes
-        SDL_Delay(250);
-        //pause
-
-        routeChoice(&myGuy);
-        //move player
-        movePlayer(&myGuy);
+    while (gameRunning)
+    {
         
-        
-    }
+        //TODO: This is all input code which need to change when ported
+        if (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                gameRunning = 0;
+            }
+            if (event.type == SDL_KEYDOWN) {
+                SDL_Keycode keyPressed = event.key.keysym.sym;
+      
+                switch (keyPressed)
+                {
+                    case SDLK_ESCAPE:
+                        gameRunning = 0;
+                    break;
+                }
+            }
+         
+        }
 
-    SDL_RenderPresent(ren);
-    SDL_Delay(10000);
+
+
+        /* This animates the game */        
+        if (ticks++ > 250) {
+            routeChoice(&myGuy);
+            //move player
+            movePlayer(&myGuy);
+            ticks = 0;
+        }
+        SDL_Delay(1);
+        /* End of game animation */
+
+
+   }
 
     SDL_DestroyWindow(win);
     SDL_Quit();
