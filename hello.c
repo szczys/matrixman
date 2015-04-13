@@ -11,6 +11,8 @@ SDL_Renderer *ren;
 struct Player { 
     uint8_t x;
     uint8_t y;
+    uint8_t tarX; //Target X coord. for enemy
+    uint8_t tarY; //Target Y coord. fo enemy
     int8_t speed;
     uint8_t dirIsHor; // non-zero if moving in a horizontal direction
     uint8_t color;
@@ -145,13 +147,13 @@ void routeChoice(struct Player *pawn) {
 
     if (pawn->dirIsHor) {
         //This block works when travel is horizontal
-        if (canMove(testX, testY-1)) { route1 = getDistance(testX, testY-1, REDX, REDY); }
-        if (canMove(testX, testY+1)) { route2 = getDistance(testX, testY+1, REDX, REDY); }
+        if (canMove(testX, testY-1)) { route1 = getDistance(testX, testY-1, pawn->tarX, pawn->tarY); }
+        if (canMove(testX, testY+1)) { route2 = getDistance(testX, testY+1, pawn->tarX, pawn->tarY); }
         if (pawn->speed > 0) { 
-            if (canMove(testX+1, testY)) { route3 = getDistance(testX+1, testY, REDX, REDY); }
+            if (canMove(testX+1, testY)) { route3 = getDistance(testX+1, testY, pawn->tarX, pawn->tarY); }
         }
         else { 
-            if (canMove(testX-1, testY)) { route3 = getDistance(testX-1, testY, REDX, REDY); }
+            if (canMove(testX-1, testY)) { route3 = getDistance(testX-1, testY, pawn->tarX, pawn->tarY); }
         }
 
         if ((route1 < route2) && (route1 < route3)) {
@@ -165,13 +167,13 @@ void routeChoice(struct Player *pawn) {
     }
     else {
         //This block works when travel is vertical
-        if (canMove(testX-1, testY)) { route1 = getDistance(testX-1, testY, REDX, REDY); }
-        if (canMove(testX+1, testY)) { route2 = getDistance(testX+1, testY, REDX, REDY); }
+        if (canMove(testX-1, testY)) { route1 = getDistance(testX-1, testY, pawn->tarX, pawn->tarY); }
+        if (canMove(testX+1, testY)) { route2 = getDistance(testX+1, testY, pawn->tarX, pawn->tarY); }
         if (pawn->speed > 0) {
-            if (canMove(testX, testY+1)) { route3 = getDistance(testX, testY+1, REDX, REDY); }
+            if (canMove(testX, testY+1)) { route3 = getDistance(testX, testY+1, pawn->tarX, pawn->tarY); }
         }
         else {
-            if (canMove(testX, testY-1)) { route3 = getDistance(testX, testY-1, REDX, REDY); }
+            if (canMove(testX, testY-1)) { route3 = getDistance(testX, testY-1, pawn->tarX, pawn->tarY); }
         }
 
         if ((route1 < route2) && (route1 < route3)) {
@@ -194,6 +196,8 @@ int main(int argn, char **argv)
     myGuy.speed = 10; //Currently only used for determining -/+ of movement
     myGuy.dirIsHor = 1;
     myGuy.color = YELLOW;
+    myGuy.tarX = PINKX;
+    myGuy.tarY = PINKY;
     
     initDisplay();
     
