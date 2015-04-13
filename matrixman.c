@@ -144,7 +144,26 @@ uint16_t getDistance(uint8_t x, uint8_t y, uint8_t targetX, uint8_t targetY) {
 }
 
 void playerRoute(struct Player *pawn, uint8_t nextDir) {
+    if (nextDir == pawn->travelDir) return;
+
+    uint8_t testX = pawn->x;
+    uint8_t testY = pawn->y;
+    switch (nextDir) {
+        case UP:
+            testY--;
+            break;
+        case DOWN:
+            testY++;
+            break;
+        case LEFT:
+            testX--;
+            break;
+        case RIGHT:
+            testX++;
+            break;
+    }
     
+    if (canMove(testX, testY)) { pawn->travelDir = nextDir; }   
 }
 
 void routeChoice(struct Player *pawn) {
@@ -260,19 +279,19 @@ int main(int argn, char **argv)
                         break;
                     case SDLK_UP:
                         printf("Up Key Pressed\n");
-                        nextDir = 2;
+                        nextDir = UP;
                         break;
                     case SDLK_DOWN:
                         printf("Down Key Pressed\n");
-                        nextDir = 3;
+                        nextDir = DOWN;
                         break;
                     case SDLK_LEFT:
                         printf("Left Key Pressed\n");
-                        nextDir = 1;
+                        nextDir = LEFT;
                         break;
                     case SDLK_RIGHT:
                         printf("Right Key Pressed\n");
-                        nextDir = 0;
+                        nextDir = RIGHT;
                         break;
                 }
             }
@@ -283,10 +302,10 @@ int main(int argn, char **argv)
 
         /* This animates the game */        
         if (ticks++ > 250) {
-            routeChoice(&myGuy); //This is for enemy movement
+            //routeChoice(&myGuy); //This is for enemy movement
 
-            //move player
-            movePlayer(&myGuy);
+            playerRoute(&myGuy, nextDir);        //see if player wanted direction change
+            movePlayer(&myGuy); //move player
 
             //TODO: Reset counter (this should be interrupts when in hardware
             ticks = 0;
