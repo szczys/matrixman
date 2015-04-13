@@ -14,11 +14,18 @@ struct Player {
     uint8_t tarX; //Target X coord. for enemy
     uint8_t tarY; //Target Y coord. fo enemy
     int8_t speed;
-    uint8_t dirIsHor; // non-zero if moving in a horizontal direction
+    //uint8_t dirIsHor; // non-zero if moving in a horizontal direction
+    uint8_t travelDir;
     uint8_t color;
 };
 
 struct Player myGuy;
+
+//Directions of travel
+#define UP      0
+#define DOWN    1
+#define LEFT    2
+#define RIGHT   3
 
 //Enemy Data
 #define REDX 27
@@ -30,6 +37,7 @@ struct Player myGuy;
 #define BLUEX 29
 #define BLUEY 31
 
+//Color definitions
 #define BLUE 0
 #define YELLOW 1
 #define RED 2
@@ -38,6 +46,7 @@ struct Player myGuy;
 #define CYAN 5
 #define BLACK 6
 
+//Color values
 static const uint8_t colors[][3] = {
     { 0, 0, 255 },
     { 255, 255, 0 },
@@ -94,13 +103,19 @@ void movePlayer(struct Player *pawn) {
     uint8_t testX = pawn->x;
     uint8_t testY = pawn->y;
 
-    if (pawn->dirIsHor) {
-        if (pawn->speed > 0) { testX++; }
-        else { testX--; }
-    }
-    else {
-        if (pawn->speed > 0) { testY++; }
-        else { testY--; }
+    switch (pawn->travelDir) {
+        case UP:
+            testY--;
+            break;
+        case DOWN:
+            testY++;
+            break;
+        case LEFT:
+            testX--;
+            break;
+        case RIGHT:
+            testX++;
+            break;
     }
 
     //is next space unoccupied?
@@ -128,6 +143,10 @@ uint16_t getDistance(uint8_t x, uint8_t y, uint8_t targetX, uint8_t targetY) {
     return (hor * hor) + (vert * vert);
 }
 
+void playerRoute(struct Player *pawn, uint8_t nextDir) {
+    
+}
+/*
 void routeChoice(struct Player *pawn) {
     //Does the pawn have a choice of routes right now?
     uint8_t testX = pawn->x;
@@ -181,15 +200,16 @@ void routeChoice(struct Player *pawn) {
         }
     }
 }
-
+*/
 int main(int argn, char **argv)
 {
     printf("Hello world!\n");
 
     myGuy.x = 15;
     myGuy.y = 23;
-    myGuy.speed = 10; //Currently only used for determining -/+ of movement
-    myGuy.dirIsHor = 1;
+    myGuy.speed = 10; //Currently unused
+    //myGuy.dirIsHor = 1;
+    myGuy.travelDir = RIGHT;
     myGuy.color = YELLOW;
     myGuy.tarX = ORANGEX;
     myGuy.tarY = ORANGEY;
@@ -214,7 +234,7 @@ int main(int argn, char **argv)
     uint8_t gameRunning = 1;
     uint16_t ticks = 0;
 
-    uint8_t nextDir = 0; //0=right 1=left 2=up 3=down
+    uint8_t nextDir = RIGHT;
 
     while (gameRunning)
     {
