@@ -146,7 +146,7 @@ uint16_t getDistance(uint8_t x, uint8_t y, uint8_t targetX, uint8_t targetY) {
 void playerRoute(struct Player *pawn, uint8_t nextDir) {
     
 }
-/*
+
 void routeChoice(struct Player *pawn) {
     //Does the pawn have a choice of routes right now?
     uint8_t testX = pawn->x;
@@ -159,48 +159,54 @@ void routeChoice(struct Player *pawn) {
     route2 = 6000;
     route3 = 6000;
 
-    if (pawn->dirIsHor) {
-        //This block works when travel is horizontal
-        if (canMove(testX, testY-1)) { route1 = getDistance(testX, testY-1, pawn->tarX, pawn->tarY); }
-        if (canMove(testX, testY+1)) { route2 = getDistance(testX, testY+1, pawn->tarX, pawn->tarY); }
-        if (pawn->speed > 0) { 
-            if (canMove(testX+1, testY)) { route3 = getDistance(testX+1, testY, pawn->tarX, pawn->tarY); }
-        }
-        else { 
-            if (canMove(testX-1, testY)) { route3 = getDistance(testX-1, testY, pawn->tarX, pawn->tarY); }
-        }
-
-        if ((route1 < route2) && (route1 < route3)) {
-            pawn->dirIsHor = 0;
-            pawn->speed = -10;
-        }
-        else if ((route2 < route1) && (route2 < route3)) {
-            pawn->dirIsHor = 0;
-            pawn->speed = +10;
-        }
-    }
-    else {
-        //This block works when travel is vertical
-        if (canMove(testX-1, testY)) { route1 = getDistance(testX-1, testY, pawn->tarX, pawn->tarY); }
-        if (canMove(testX+1, testY)) { route2 = getDistance(testX+1, testY, pawn->tarX, pawn->tarY); }
-        if (pawn->speed > 0) {
-            if (canMove(testX, testY+1)) { route3 = getDistance(testX, testY+1, pawn->tarX, pawn->tarY); }
-        }
-        else {
+    switch(pawn->travelDir) {
+        case UP:
+            if (canMove(testX-1, testY)) { route1 = getDistance(testX-1, testY, pawn->tarX, pawn->tarY); }
+            if (canMove(testX+1, testY)) { route2 = getDistance(testX+1, testY, pawn->tarX, pawn->tarY); }
             if (canMove(testX, testY-1)) { route3 = getDistance(testX, testY-1, pawn->tarX, pawn->tarY); }
-        }
-
-        if ((route1 < route2) && (route1 < route3)) {
-            pawn->dirIsHor = 1;
-            pawn->speed = -10;
-        }
-        else if ((route2 < route1) && (route2 < route3)) {
-            pawn->dirIsHor = 1;
-            pawn->speed = +10;
-        }
+            if ((route1 < route2) && (route1 < route3)) {
+                pawn->travelDir = LEFT;
+            }
+            else if ((route2 < route1) && (route2 < route3)) {
+                pawn->travelDir = RIGHT;
+            }
+            break;
+        case DOWN:
+            if (canMove(testX-1, testY)) { route1 = getDistance(testX-1, testY, pawn->tarX, pawn->tarY); }
+            if (canMove(testX+1, testY)) { route2 = getDistance(testX+1, testY, pawn->tarX, pawn->tarY); }
+            if (canMove(testX, testY+1)) { route3 = getDistance(testX, testY+1, pawn->tarX, pawn->tarY); }
+            if ((route1 < route2) && (route1 < route3)) {
+                pawn->travelDir = LEFT;
+            }
+            else if ((route2 < route1) && (route2 < route3)) {
+                pawn->travelDir = RIGHT;
+            }
+            break;
+        case LEFT:
+            if (canMove(testX, testY-1)) { route1 = getDistance(testX, testY-1, pawn->tarX, pawn->tarY); }
+            if (canMove(testX, testY+1)) { route2 = getDistance(testX, testY+1, pawn->tarX, pawn->tarY); }
+            if (canMove(testX-1, testY)) { route3 = getDistance(testX-1, testY, pawn->tarX, pawn->tarY); }
+            if ((route1 < route2) && (route1 < route3)) {
+                pawn->travelDir = UP;
+            }
+            else if ((route2 < route1) && (route2 < route3)) {
+                pawn->travelDir = DOWN;   //TODO: apparently moving up is forbidden in original AI logic
+            }
+            break;
+        case RIGHT:
+            if (canMove(testX, testY-1)) { route1 = getDistance(testX, testY-1, pawn->tarX, pawn->tarY); }
+            if (canMove(testX, testY+1)) { route2 = getDistance(testX, testY+1, pawn->tarX, pawn->tarY); }
+            if (canMove(testX+1, testY)) { route3 = getDistance(testX+1, testY, pawn->tarX, pawn->tarY); }
+            if ((route1 < route2) && (route1 < route3)) {
+                pawn->travelDir = UP;
+            }
+            else if ((route2 < route1) && (route2 < route3)) {
+                pawn->travelDir = DOWN;   //TODO: apparently moving up is forbidden in original AI logic
+            }
+            break;
     }
 }
-*/
+
 int main(int argn, char **argv)
 {
     printf("Hello world!\n");
@@ -277,7 +283,7 @@ int main(int argn, char **argv)
 
         /* This animates the game */        
         if (ticks++ > 250) {
-            //routeChoice(&myGuy); //This is for enemy movement
+            routeChoice(&myGuy); //This is for enemy movement
 
             //move player
             movePlayer(&myGuy);
