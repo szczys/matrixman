@@ -114,11 +114,6 @@ void movePlayer(struct Player *pawn) {
         displayPixel(pawn->x, pawn->y, pawn->color);
         SDL_RenderPresent(ren);
     }
-    //TODO: Remove this else statement (just for testing)
-    else {
-        if (pawn->speed < 0) pawn->speed = 10;
-        else pawn->speed = -10;
-    }
 }
 
 uint16_t getDistance(uint8_t x, uint8_t y, uint8_t targetX, uint8_t targetY) {
@@ -219,6 +214,8 @@ int main(int argn, char **argv)
     uint8_t gameRunning = 1;
     uint16_t ticks = 0;
 
+    uint8_t nextDir = 0; //0=right 1=left 2=up 3=down
+
     while (gameRunning)
     {
         
@@ -234,7 +231,23 @@ int main(int argn, char **argv)
                 {
                     case SDLK_ESCAPE:
                         gameRunning = 0;
-                    break;
+                        break;
+                    case SDLK_UP:
+                        printf("Up Key Pressed\n");
+                        nextDir = 2;
+                        break;
+                    case SDLK_DOWN:
+                        printf("Down Key Pressed\n");
+                        nextDir = 3;
+                        break;
+                    case SDLK_LEFT:
+                        printf("Left Key Pressed\n");
+                        nextDir = 1;
+                        break;
+                    case SDLK_RIGHT:
+                        printf("Right Key Pressed\n");
+                        nextDir = 0;
+                        break;
                 }
             }
          
@@ -244,9 +257,12 @@ int main(int argn, char **argv)
 
         /* This animates the game */        
         if (ticks++ > 250) {
-            routeChoice(&myGuy);
+            //routeChoice(&myGuy); //This is for enemy movement
+
             //move player
             movePlayer(&myGuy);
+
+            //TODO: Reset counter (this should be interrupts when in hardware
             ticks = 0;
         }
         SDL_Delay(1);
