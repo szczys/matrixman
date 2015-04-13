@@ -3,12 +3,12 @@ test:
 	make run;
 
 build:
-	gcc -std=c99 -c hello.c;
-	gcc hello.o -lSDL2 -o hello;
+	gcc -std=c99 -c matrixman.c;
+	gcc matrixman.o -lSDL2 -o matrixman;
 
 run:
-	./hello;
+	./matrixman;
 
 clean:
-	-rm hello;
-	-rm hello.o;
+	-rm matrixman;
+	-rm matrixman.o;

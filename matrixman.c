@@ -54,7 +54,7 @@ void initDisplay(void) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
     }
 
-    win = SDL_CreateWindow("Hello World!", 100, 100, 10*32, 10*32, SDL_WINDOW_SHOWN);
+    win = SDL_CreateWindow("Matrixman", 100, 100, 10*32, 10*32, SDL_WINDOW_SHOWN);
     if (win == nullptr) {
         printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
     }
@@ -196,8 +196,8 @@ int main(int argn, char **argv)
     myGuy.speed = 10; //Currently only used for determining -/+ of movement
     myGuy.dirIsHor = 1;
     myGuy.color = YELLOW;
-    myGuy.tarX = PINKX;
-    myGuy.tarY = PINKY;
+    myGuy.tarX = ORANGEX;
+    myGuy.tarY = ORANGEY;
     
     initDisplay();
     
