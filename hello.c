@@ -100,26 +100,16 @@ void movePlayer(struct Player *pawn) {
     }
 }
 
-uint8_t getClosest(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t targetX, uint8_t targetY) {
-    //Takes two points and a target point
-    //returns 1 if first point is closer than second
-    //returns 2 if second point is closer than first
-    uint8_t hor1, hor2, ver1, ver2;
-    uint16_t sqD1, sqD2;
-    if (x1 < targetX) { hor1 = targetX-x1; }
-    else { hor1 = x1-targetX; }
-    if (y1 < targetY) { ver1 = targetY-y1; }
-    else { ver1 = y1-targetY; }
-    if (x2 < targetX) { hor2 = targetX-x2; }
-    else { hor2 = x2-targetX; }
-    if (y2 < targetY) { ver2 = targetY-y2; }
-    else { ver2 = y2-targetY; }
+uint16_t getDistance(uint8_t x, uint8_t y, uint8_t targetX, uint8_t targetY) {
+    //Takes point and a target point and returns squared distance between them
 
-    sqD1 = (hor1 * hor1) + (ver1 * ver1);
-    sqD2 = (hor2 * hor2) + (ver2 * ver2);
+    uint8_t hor, vert;
+    if (x < targetX) { hor = targetX-x; }
+    else { hor = x-targetX; }
+    if (y < targetY) { vert = targetY-y; }
+    else { vert = y-targetY; }
 
-    if (sqD2 > sqD1) { return 1; }
-    return 2;
+    return (hor * hor) + (vert * vert);
 }
 
 void routeChoice(struct Player *pawn) {
@@ -127,69 +117,48 @@ void routeChoice(struct Player *pawn) {
     uint8_t testX = pawn->x;
     uint8_t testY = pawn->y;
 
-    //TODO: Route taking is currently arbitrary (turn if there's the opportunity)
+    //Set 3 distances then choose the shortest
+    uint16_t route1, route2, route3;
+    route1 = 6000;
+    route2 = 6000;
+    route3 = 6000;
+
     if (pawn->dirIsHor) {
-        if (pawn->speed > 0) {
-            //Currently moving right
-            if (canMove(testX, testY-1)) {
-                if (getClosest(testX+1, testY, testX, testY-1, REDX, REDY) == 2) {
-                    pawn->dirIsHor = 0;                
-                    pawn->speed = -10;
-                }
-            }
-            else if (canMove(testX, testY+1)) {
-                if (getClosest(testX+1, testY, testX, testY+1, REDX, REDY) == 2) {
-                    pawn->dirIsHor = 0;                
-                    pawn->speed = 10;
-                }
-            }
+        if (canMove(testX, testY-1)) { route1 = getDistance(testX, testY-1, REDX, REDY); }
+        if (canMove(testX, testY+1)) { route2 = getDistance(testX, testY+1, REDX, REDY); }
+        if (pawn->speed > 0) { 
+            if (canMove(testX+1, testY)) { route3 = getDistance(testX+1, testY, REDX, REDY); }
         }
-        else {
-            //Currently moving left
-            if (canMove(testX, testY-1)) {
-                if (getClosest(testX-1, testY, testX, testY-1, REDX, REDY) == 2) {
-                    pawn->dirIsHor = 0;                
-                    pawn->speed = -10;
-                }
-            }
-            else if (canMove(testX, testY+1)) {
-                if (getClosest(testX-1, testY, testX, testY+1, REDX, REDY) == 2) {
-                    pawn->dirIsHor = 0;                
-                    pawn->speed = 10;
-                }
-            }
+        else { 
+            if (canMove(testX-1, testY)) { route3 = getDistance(testX-1, testY, REDX, REDY); }
+        }
+
+        if ((route1 < route2) && (route1 < route3)) {
+            pawn->dirIsHor = 0;
+            pawn->speed = -10;
+        }
+        else if ((route2 < route1) && (route2 < route3)) {
+            pawn->dirIsHor = 0;
+            pawn->speed = +10;
         }
     }
     else {
+        if (canMove(testX-1, testY)) { route1 = getDistance(testX-1, testY, REDX, REDY); }
+        if (canMove(testX+1, testY)) { route2 = getDistance(testX+1, testY, REDX, REDY); }
         if (pawn->speed > 0) {
-            //Currently moving up
-            if (canMove(testX-1, testY)) {
-                if (getClosest(testX, testY+1, testX-1, testY, REDX, REDY) == 2) {
-                    pawn->dirIsHor = 1;                
-                    pawn->speed = -10;
-                }
-            }
-            else if (canMove(testX+1, testY)) {
-                if (getClosest(testX, testY+1, testX+1, testY, REDX, REDY) == 2) {
-                    pawn->dirIsHor = 1;                
-                    pawn->speed = 10;
-                }
-            }
+            if (canMove(testX, testY+1)) { route3 = getDistance(testX, testY+1, REDX, REDY); }
         }
         else {
-            //Currently moving down
-            if (canMove(testX-1, testY)) {
-                if (getClosest(testX, testY-1, testX-1, testY, REDX, REDY) == 2) {
-                    pawn->dirIsHor = 1;                
-                    pawn->speed = -10;
-                }
-            }
-            else if (canMove(testX+1, testY)) {
-                if (getClosest(testX, testY-1, testX+1, testY, REDX, REDY) == 2) {
-                    pawn->dirIsHor = 1;                
-                    pawn->speed = 10;
-                }
-            }
+            if (canMove(testX, testY-1)) { route3 = getDistance(testX, testY-1, REDX, REDY); }
+        }
+
+        if ((route1 < route2) && (route1 < route3)) {
+            pawn->dirIsHor = 1;
+            pawn->speed = -10;
+        }
+        else if ((route2 < route1) && (route2 < route3)) {
+            pawn->dirIsHor = 1;
+            pawn->speed = +10;
         }
     }
 }
