@@ -320,7 +320,7 @@ void setupPlayers(void) {
     enemy2.x = 15;
     enemy2.y = 14;
     enemy2.speed = 10; //Currently unused
-    enemy2.travelDir = RIGHT;
+    enemy2.travelDir = LEFT;
     enemy2.color = PINK;
     enemy2.tarX = PINKX;
     enemy2.tarY = PINKY;
@@ -328,7 +328,7 @@ void setupPlayers(void) {
     enemy3.x = 15;
     enemy3.y = 14;
     enemy3.speed = 10; //Currently unused
-    enemy3.travelDir = RIGHT;
+    enemy3.travelDir = LEFT;
     enemy3.color = CYAN;
     enemy3.tarX = CYANX;
     enemy3.tarY = CYANY;
@@ -336,7 +336,7 @@ void setupPlayers(void) {
     enemy4.x = 15;
     enemy4.y = 14;
     enemy4.speed = 10; //Currently unused
-    enemy4.travelDir = RIGHT;
+    enemy4.travelDir = LEFT;
     enemy4.color = ORANGE;
     enemy4.tarX = ORANGEX;
     enemy4.tarY = ORANGEY;
