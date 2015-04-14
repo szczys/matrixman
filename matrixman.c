@@ -235,14 +235,14 @@ void routeChoice(struct Player *pawn) {
     }
 }
 
-void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn2) {
+void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn2, struct Player *pawn3) {
     if (enemyMode == SCATTER) { return; }
 
-    //Enemy1
+    /*--------------- Enemy1 ------------------*/
     pawn1->tarX = player->x;
     pawn1->tarY = player->y;
 
-    //Enemy2
+    /*--------------- Enemy2 ------------------*/
     switch (player->travelDir) {
         case UP:
             if (player->y < 4) { pawn2->tarY = 0; }
@@ -265,9 +265,23 @@ void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn
             break;
     }
 
-    //Enemy3
+    /*--------------- Enemy3 ------------------*/
+    int8_t tempNum;
 
-    //Enemy4
+    //setX
+    tempNum = player->x - (pawn1->x - player->x);
+    if (tempNum < 0) { tempNum = 0; }    
+    if (tempNum > 31) { tempNum = 31; }
+    pawn3->tarX = (uint8_t)tempNum;
+
+    //setY    
+    tempNum = player->y - (pawn1->y - player->y);
+    if (tempNum < 0) { tempNum = 0; }    
+    if (tempNum > 31) { tempNum = 31; }
+    pawn3->tarY = (uint8_t)tempNum;
+
+    /*--------------- Enemy4 ------------------*/
+    
 }
 
 void setupPlayers(void) {
@@ -385,7 +399,7 @@ int main(int argn, char **argv)
 
         /* This animates the game */        
         if (ticks++ > 250) {
-            setTargets(&myGuy, &enemy1, &enemy2);
+            setTargets(&myGuy, &enemy1, &enemy2, &enemy3);
             routeChoice(&enemy1); //This is for enemy movement
             routeChoice(&enemy2);
             routeChoice(&enemy3);
