@@ -317,24 +317,24 @@ void setupPlayers(void) {
     enemy1.tarX = REDX;
     enemy1.tarY = REDY;
 
-    enemy2.x = 15;
-    enemy2.y = 14;
+    enemy2.x = 17;
+    enemy2.y = 16;
     enemy2.speed = 10; //Currently unused
     enemy2.travelDir = LEFT;
     enemy2.color = PINK;
     enemy2.tarX = PINKX;
     enemy2.tarY = PINKY;
 
-    enemy3.x = 15;
-    enemy3.y = 14;
+    enemy3.x = 17;
+    enemy3.y = 17;
     enemy3.speed = 10; //Currently unused
     enemy3.travelDir = LEFT;
     enemy3.color = CYAN;
     enemy3.tarX = CYANX;
     enemy3.tarY = CYANY;
 
-    enemy4.x = 15;
-    enemy4.y = 14;
+    enemy4.x = 14;
+    enemy4.y = 17;
     enemy4.speed = 10; //Currently unused
     enemy4.travelDir = LEFT;
     enemy4.color = ORANGE;
