@@ -131,9 +131,12 @@ void movePlayer(struct Player *pawn) {
     if (canMove(testX, testY)) {
         //erase player at current spot
         displayPixel(pawn->x, pawn->y, BLACK);
+        //Tunnel Tests
+        if ((testY == 14) && (testX == 1)) { testX = 29; }
+        if ((testY == 14) && (testX == 30)) { testX = 2; }
         //increment player position
         pawn->x = testX;
-        pawn->y = testY; 
+        pawn->y = testY;
         //redraw player at new spot
         displayPixel(pawn->x, pawn->y, pawn->color);
         SDL_RenderPresent(ren);
@@ -334,7 +337,7 @@ void setupPlayers(void) {
     enemy4.tarX = ORANGEX;
     enemy4.tarY = ORANGEY;
 
-    enemyMode = CHASE;
+    enemyMode = SCATTER;
 }
 
 int main(int argn, char **argv)
