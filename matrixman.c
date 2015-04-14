@@ -20,6 +20,9 @@ struct Player {
 
 struct Player myGuy;
 struct Player enemy1;
+struct Player enemy2;
+struct Player enemy3;
+struct Player enemy4;
 
 uint8_t enemyMode;
 
@@ -40,8 +43,8 @@ uint8_t enemyMode;
 #define PINKY 0
 #define ORANGEX 2
 #define ORANGEY 31
-#define BLUEX 29
-#define BLUEY 31
+#define CYANX 29
+#define CYANY 31
 
 //Color definitions
 #define BLUE 0
@@ -54,13 +57,13 @@ uint8_t enemyMode;
 
 //Color values
 static const uint8_t colors[][3] = {
-    { 0, 0, 255 },
-    { 255, 255, 0 },
-    { 255, 0, 0 },
-    { 0, 0, 0 },
-    { 0, 0, 0 },
-    { 0, 255, 255 },
-    { 0, 0, 0 }
+    { 0, 0, 255 },      //Blue
+    { 255, 255, 0 },    //Yellow
+    { 255, 0, 0 },      //Red
+    { 255, 153, 204 },        //Pink
+    { 255, 102, 0 },        //Orange
+    { 0, 255, 255 },    //Cyan
+    { 0, 0, 0 }         //Black
 };
 
 void initDisplay(void) {
@@ -232,7 +235,7 @@ void routeChoice(struct Player *pawn) {
     }
 }
 
-void setTargets(struct Player *player, struct Player *pawn1) {
+void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn2) {
     if (enemyMode == SCATTER) { return; }
 
     //Enemy1
@@ -240,16 +243,34 @@ void setTargets(struct Player *player, struct Player *pawn1) {
     pawn1->tarY = player->y;
 
     //Enemy2
+    switch (player->travelDir) {
+        case UP:
+            if (player->y < 4) { pawn2->tarY = 0; }
+            else { pawn2->tarY = player->y - 4; }
+            //Account for original game overflow bug
+            if (player->x < 4) { pawn2->tarX = 0; }
+            else { pawn2->tarX = player->x - 4; }
+            break;
+        case DOWN:
+            if (player->y > 27) { pawn2->tarY = 31; }
+            else { pawn2->tarY = player->y + 4; }
+            break;
+        case LEFT:
+            if (player->x < 4) { pawn2->tarX = 0; }
+            else { pawn2->tarX = player->x - 4; }
+            break;
+        case RIGHT:
+            if (player->x > 27) { pawn2->tarX = 31; }
+            else { pawn2->tarX = player->x + 4; }
+            break;
+    }
 
     //Enemy3
 
     //Enemy4
 }
 
-int main(int argn, char **argv)
-{
-    printf("Hello world!\n");
-
+void setupPlayers(void) {
     //Set Player values
     myGuy.x = 15;
     myGuy.y = 23;
@@ -268,7 +289,38 @@ int main(int argn, char **argv)
     enemy1.tarX = REDX;
     enemy1.tarY = REDY;
 
+    enemy2.x = 15;
+    enemy2.y = 11;
+    enemy2.speed = 10; //Currently unused
+    enemy2.travelDir = RIGHT;
+    enemy2.color = PINK;
+    enemy2.tarX = PINKX;
+    enemy2.tarY = PINKY;
+
+    enemy3.x = 15;
+    enemy3.y = 11;
+    enemy3.speed = 10; //Currently unused
+    enemy3.travelDir = RIGHT;
+    enemy3.color = CYAN;
+    enemy3.tarX = CYANX;
+    enemy3.tarY = CYANY;
+
+    enemy4.x = 15;
+    enemy4.y = 11;
+    enemy4.speed = 10; //Currently unused
+    enemy4.travelDir = RIGHT;
+    enemy4.color = ORANGE;
+    enemy4.tarX = ORANGEX;
+    enemy4.tarY = ORANGEY;
+
     enemyMode = CHASE;
+}
+
+int main(int argn, char **argv)
+{
+    printf("Hello world!\n");
+
+    setupPlayers(); //set initial values for player and enemies
     
     initDisplay();
     
@@ -333,9 +385,16 @@ int main(int argn, char **argv)
 
         /* This animates the game */        
         if (ticks++ > 250) {
-            setTargets(&myGuy, &enemy1);
+            setTargets(&myGuy, &enemy1, &enemy2);
             routeChoice(&enemy1); //This is for enemy movement
+            routeChoice(&enemy2);
+            routeChoice(&enemy3);
+            routeChoice(&enemy4);
+
             movePlayer(&enemy1);
+            movePlayer(&enemy2);
+            movePlayer(&enemy3);
+            movePlayer(&enemy4);
 
             playerRoute(&myGuy, nextDir);        //see if player wanted direction change
             movePlayer(&myGuy); //move player
