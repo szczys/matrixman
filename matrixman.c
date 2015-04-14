@@ -42,9 +42,9 @@ uint8_t enemyMode;
 #define PINKX 4
 #define PINKY 0
 #define ORANGEX 2
-#define ORANGEY 31
+#define ORANGEY 35
 #define CYANX 29
-#define CYANY 31
+#define CYANY 35
 
 //Color definitions
 #define BLUE 0
@@ -92,7 +92,7 @@ void displayPixel(uint8_t x, uint8_t y, char color) {
     SDL_Rect rect;
     //TODO: Eventually these rectangles will just be LED pixels so this number 10 is arbitrary
     rect.x = x*10;
-    rect.y = y*10;
+    rect.y = (y-2)*10;
     rect.w = 10;
     rect.h = 10;
 
@@ -183,6 +183,10 @@ void routeChoice(struct Player *pawn) {
     uint8_t testX = pawn->x;
     uint8_t testY = pawn->y;
 
+    //Test for four intersections where turning upward is forbidden
+    if (((testX == 14) || (testX == 17)) 
+        && ((testY == 14) || (testY == 27))) { printf("no turning up\n"); return; }
+
     //Set 3 distances then choose the shortest
     uint16_t route1, route2, route3;
     //Set arbitrarily high distance numbers
@@ -255,7 +259,7 @@ void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn
             else { pawn2->tarX = player->x - 4; }
             break;
         case DOWN:
-            if (player->y > 27) { pawn2->tarY = 31; }
+            if (player->y > 31) { pawn2->tarY = 35; }
             else { pawn2->tarY = player->y + 4; }
             break;
         case LEFT:
@@ -280,7 +284,7 @@ void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn
     //setY    
     tempNum = player->y - (pawn1->y - player->y);
     if (tempNum < 0) { tempNum = 0; }    
-    if (tempNum > 31) { tempNum = 31; }
+    if (tempNum > 35) { tempNum = 35; }
     pawn3->tarY = (uint8_t)tempNum;
 
     /*--------------- Enemy4 ------------------*/
@@ -297,24 +301,24 @@ void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn
 void setupPlayers(void) {
     //Set Player values
     myGuy.x = 15;
-    myGuy.y = 23;
+    myGuy.y = 26;
     myGuy.speed = 10; //Currently unused
-    myGuy.travelDir = RIGHT;
+    myGuy.travelDir = LEFT;
     myGuy.color = YELLOW;
     myGuy.tarX = ORANGEX;
     myGuy.tarY = ORANGEY;
     
     //Set Enemy values
     enemy1.x = 15;
-    enemy1.y = 11;
+    enemy1.y = 14;
     enemy1.speed = 10; //Currently unused
-    enemy1.travelDir = RIGHT;
+    enemy1.travelDir = LEFT;
     enemy1.color = RED;
     enemy1.tarX = REDX;
     enemy1.tarY = REDY;
 
     enemy2.x = 15;
-    enemy2.y = 11;
+    enemy2.y = 14;
     enemy2.speed = 10; //Currently unused
     enemy2.travelDir = RIGHT;
     enemy2.color = PINK;
@@ -322,7 +326,7 @@ void setupPlayers(void) {
     enemy2.tarY = PINKY;
 
     enemy3.x = 15;
-    enemy3.y = 11;
+    enemy3.y = 14;
     enemy3.speed = 10; //Currently unused
     enemy3.travelDir = RIGHT;
     enemy3.color = CYAN;
@@ -330,7 +334,7 @@ void setupPlayers(void) {
     enemy3.tarY = CYANY;
 
     enemy4.x = 15;
-    enemy4.y = 11;
+    enemy4.y = 14;
     enemy4.speed = 10; //Currently unused
     enemy4.travelDir = RIGHT;
     enemy4.color = ORANGE;
@@ -349,7 +353,7 @@ int main(int argn, char **argv)
     initDisplay();
     
     uint16_t i;
-    for (i = 0; i < 32; i++) {
+    for (i = 2; i < 34; i++) {
         printf("Loop %d\n",i);
         for (uint16_t j = 0; j<32; j++) {
             if (board[i] & (1<<(31-j))) {    //Invert the x (big endian)
