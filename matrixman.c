@@ -21,6 +21,12 @@ struct Player {
 struct Player myGuy;
 struct Player enemy1;
 
+uint8_t enemyMode;
+
+//enemyMode types
+#define SCATTER 0
+#define CHASE 1
+
 //Directions of travel
 #define UP      0
 #define DOWN    1
@@ -226,6 +232,20 @@ void routeChoice(struct Player *pawn) {
     }
 }
 
+void setTargets(struct Player *player, struct Player *pawn1) {
+    if (enemyMode == SCATTER) { return; }
+
+    //Enemy1
+    pawn1->tarX = player->x;
+    pawn1->tarY = player->y;
+
+    //Enemy2
+
+    //Enemy3
+
+    //Enemy4
+}
+
 int main(int argn, char **argv)
 {
     printf("Hello world!\n");
@@ -247,6 +267,8 @@ int main(int argn, char **argv)
     enemy1.color = RED;
     enemy1.tarX = REDX;
     enemy1.tarY = REDY;
+
+    enemyMode = CHASE;
     
     initDisplay();
     
@@ -311,6 +333,7 @@ int main(int argn, char **argv)
 
         /* This animates the game */        
         if (ticks++ > 250) {
+            setTargets(&myGuy, &enemy1);
             routeChoice(&enemy1); //This is for enemy movement
             movePlayer(&enemy1);
 
