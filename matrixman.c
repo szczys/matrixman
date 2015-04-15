@@ -157,8 +157,9 @@ void movePlayer(struct Player *pawn) {
         displayPixel(pawn->x, pawn->y, pawn->color);
         SDL_RenderPresent(ren);
         //gobble the dot
-        if (pawn == &myGuy) {
+        if ((pawn == &myGuy) && (dotTracker[pawn->y] & (1<<(31-pawn->x)))) {
             ++gobbleCount;
+            printf("gobbleCount: %d\n", gobbleCount);
             dotTracker[pawn->y] &= ~(1<<(31-pawn->x));
         }
     }
