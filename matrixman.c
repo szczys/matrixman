@@ -3,6 +3,9 @@
 #include "board.h"
 #include "dots.h"
 
+uint32_t dotTracker[36];
+uint8_t gobbleCount = 0;
+
 //SDL2 variables
 void* nullptr;
 SDL_Window *win;
@@ -141,8 +144,9 @@ void movePlayer(struct Player *pawn) {
 
     //is next space unoccupied?
     if (canMove(testX, testY)) {
-        //erase player at current spot
-        displayPixel(pawn->x, pawn->y, BLACK);
+        //erase player at current spot (redraw dot if necessary)
+        if (dotTracker[pawn->y] & 1<<(31-pawn->x)) { displayPixel(pawn->x, pawn->y, GREY); }
+        else { displayPixel(pawn->x, pawn->y, BLACK); }
         //Tunnel Tests
         if ((testY == 17) && (testX == 1)) { testX = 29; }
         if ((testY == 17) && (testX == 30)) { testX = 2; }
@@ -152,6 +156,11 @@ void movePlayer(struct Player *pawn) {
         //redraw player at new spot
         displayPixel(pawn->x, pawn->y, pawn->color);
         SDL_RenderPresent(ren);
+        //gobble the dot
+        if (pawn == &myGuy) {
+            ++gobbleCount;
+            dotTracker[pawn->y] &= ~(1<<(31-pawn->x));
+        }
     }
 }
 
@@ -411,8 +420,14 @@ int main(int argn, char **argv)
         }        
     }
     
+    //Get Dot-tracking array ready
+    for (uint8_t i=0; i<36; i++) {
+        dotTracker[i] = 0x00000000;
+    }
     //Draw the dots
     for (uint16_t i = 2; i < 34; i++) {
+        //Copy the dots to the dotTracker
+        dotTracker[i] = dots[i];
         printf("Loop %d\n",i);
         for (uint16_t j = 0; j<32; j++) {
             if (dots[i] & (1<<(31-j))) {    //Invert the x (big endian)
