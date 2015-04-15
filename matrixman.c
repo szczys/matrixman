@@ -7,6 +7,9 @@ void* nullptr;
 SDL_Window *win;
 SDL_Renderer *ren;
 
+#define TRUE 1
+#define FALSE 0
+
 //Player Variables
 struct Player { 
     uint8_t x;          //Position on the game surface, 0 is left
@@ -16,6 +19,7 @@ struct Player {
     int8_t speed;       //Currently unused
     uint8_t travelDir;  //Uses directional defines below
     uint8_t color;      //Uses color defines below
+    uint8_t inPlay;
 };
 
 struct Player myGuy;
@@ -29,6 +33,11 @@ uint8_t enemyMode;
 //enemyMode types
 #define SCATTER 0
 #define CHASE 1
+
+static const uint16_t behaviors[] = {
+    //In milliseconds
+    7000, 20000, 7000, 20000, 5000, 20000, 10, 0 //trailing zero is a hack
+};
 
 //Directions of travel
 #define UP      0
@@ -185,7 +194,8 @@ void routeChoice(struct Player *pawn) {
 
     //Test for four intersections where turning upward is forbidden
     if (((testX == 14) || (testX == 17)) 
-        && ((testY == 14) || (testY == 27))) { printf("no turning up\n"); return; }
+        && ((testY == 14) || (testY == 27))
+        && pawn->travelDir != DOWN) { printf("no turning up\n"); return; }
 
     //Set 3 distances then choose the shortest
     uint16_t route1, route2, route3;
@@ -298,6 +308,18 @@ void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn
     }
 }
 
+void checkDots(void) {
+    //TODO: Add dot counters for all enemies (enemy2 is always zero)
+    if (enemy2.inPlay == FALSE) {
+        displayPixel(enemy2.x, enemy2.y, BLACK); //erase current locaiton
+        enemy2.x = 18;
+        enemy2.y = 14;
+        displayPixel(enemy2.x, enemy2.y, enemy2.color); //Draw new locaiton
+        enemy2.inPlay = TRUE;
+        enemy2.travelDir = LEFT; //TODO: shouldn't need to reset direction here
+    }
+}
+
 void setupPlayers(void) {
     //Set Player values
     myGuy.x = 15;
@@ -316,6 +338,7 @@ void setupPlayers(void) {
     enemy1.color = RED;
     enemy1.tarX = REDX;
     enemy1.tarY = REDY;
+    enemy1.inPlay = TRUE;
 
     enemy2.x = 17;
     enemy2.y = 16;
@@ -324,6 +347,7 @@ void setupPlayers(void) {
     enemy2.color = PINK;
     enemy2.tarX = PINKX;
     enemy2.tarY = PINKY;
+    enemy2.inPlay = FALSE;
 
     enemy3.x = 17;
     enemy3.y = 17;
@@ -332,6 +356,7 @@ void setupPlayers(void) {
     enemy3.color = CYAN;
     enemy3.tarX = CYANX;
     enemy3.tarY = CYANY;
+    enemy3.inPlay = FALSE;
 
     enemy4.x = 14;
     enemy4.y = 17;
@@ -340,8 +365,29 @@ void setupPlayers(void) {
     enemy4.color = ORANGE;
     enemy4.tarX = ORANGEX;
     enemy4.tarY = ORANGEY;
+    enemy4.inPlay = FALSE;
 
     enemyMode = SCATTER;
+}
+
+void changeBehavior(uint8_t mode) {
+    switch(mode) {
+        case SCATTER:
+            //Change Targets
+            enemy1.tarX = REDX;
+            enemy1.tarY = REDY;
+            enemy2.tarX = PINKX;
+            enemy2.tarY = PINKY;
+            enemy3.tarX = CYANX;
+            enemy3.tarY = CYANY;
+            enemy4.tarX = ORANGEX;
+            enemy4.tarY = ORANGEY;
+            enemyMode = SCATTER;
+            break;
+        case CHASE:
+            enemyMode = CHASE;
+            break;
+    }
 }
 
 int main(int argn, char **argv)
@@ -369,6 +415,8 @@ int main(int argn, char **argv)
     SDL_Event event;
     uint8_t gameRunning = 1;
     uint16_t ticks = 0;
+    uint16_t behaviorTicks = 0;
+    uint8_t behaviorIndex = 0;
 
     uint8_t nextDir = RIGHT;
 
@@ -411,8 +459,24 @@ int main(int argn, char **argv)
 
 
 
-        /* This animates the game */        
-        if (ticks++ > 250) {
+        /* This animates the game */
+
+        //Switch Modes
+        if (behaviorTicks++ > behaviors[behaviorIndex]) {
+            if (behaviors[behaviorIndex] > 0) {
+                //Checking for 0 lets us run final behavior forever
+                behaviorIndex++;
+                behaviorTicks = 0;
+                
+                //TODO: We're about to behavior switch, all enemys should change direction
+                
+                if (behaviorIndex % 2) { changeBehavior(CHASE); }
+                else { changeBehavior(SCATTER); }
+            }
+        }
+
+        //Move the players        
+        if (ticks++ > 150) {
             setTargets(&myGuy, &enemy1, &enemy2, &enemy3, &enemy4);
             routeChoice(&enemy1); //This is for enemy movement
             routeChoice(&enemy2);
@@ -431,6 +495,10 @@ int main(int argn, char **argv)
             //TODO: Reset counter (this should be interrupts when in hardware
             ticks = 0;
         }
+        
+        //Enemy dot counters
+        checkDots();
+        
         SDL_Delay(1);
         /* End of game animation */
 
