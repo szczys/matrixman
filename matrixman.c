@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include "board.h"
+#include "dots.h"
 
 //SDL2 variables
 void* nullptr;
@@ -63,16 +64,18 @@ static const uint16_t behaviors[] = {
 #define ORANGE 4
 #define CYAN 5
 #define BLACK 6
+#define GREY 7
 
 //Color values
 static const uint8_t colors[][3] = {
     { 0, 0, 255 },      //Blue
     { 255, 255, 0 },    //Yellow
     { 255, 0, 0 },      //Red
-    { 255, 153, 204 },        //Pink
-    { 255, 102, 0 },        //Orange
+    { 255, 153, 204 },  //Pink
+    { 255, 102, 0 },    //Orange
     { 0, 255, 255 },    //Cyan
-    { 0, 0, 0 }         //Black
+    { 0, 0, 0 },        //Black
+    { 64, 64, 64 }      //Grey
 };
 
 void initDisplay(void) {
@@ -398,12 +401,22 @@ int main(int argn, char **argv)
     
     initDisplay();
     
-    uint16_t i;
-    for (i = 2; i < 34; i++) {
+    //Draw the board
+    for (uint16_t i = 2; i < 34; i++) {
         printf("Loop %d\n",i);
         for (uint16_t j = 0; j<32; j++) {
             if (board[i] & (1<<(31-j))) {    //Invert the x (big endian)
                 displayPixel(j, i, BLUE); 
+            }
+        }        
+    }
+    
+    //Draw the dots
+    for (uint16_t i = 2; i < 34; i++) {
+        printf("Loop %d\n",i);
+        for (uint16_t j = 0; j<32; j++) {
+            if (dots[i] & (1<<(31-j))) {    //Invert the x (big endian)
+                displayPixel(j, i, GREY); 
             }
         }        
     }
