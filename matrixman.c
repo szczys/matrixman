@@ -25,6 +25,7 @@ struct Player {
     uint8_t inPlay;     //On the hunt = TRUE, in reserve = FALSE
     uint8_t dotCount;   /*For player tracks level completion
                           For enemy decides when to go inPlay*/
+    uint8_t dotLimit;   //How many dots before this enemy is inPlay
 };
 
 struct Player myGuy;
@@ -350,7 +351,7 @@ void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn
 
 void checkDots(struct Player *pawn) {
     //TODO: Add dot counters for all enemies (enemy2 is always zero)
-    if (pawn->inPlay == FALSE) {
+    if ((pawn->inPlay == FALSE) && (pawn->dotCount >= pawn->dotLimit)) {
         displayPixel(pawn->x, pawn->y, BLACK); //erase current locaiton
         pawn->x = 18;
         pawn->y = 14;
@@ -370,6 +371,7 @@ void setupPlayers(void) {
     myGuy.tarX = ORANGEX;
     myGuy.tarY = ORANGEY;
     myGuy.dotCount = 0;
+    myGuy.dotLimit = 0;
     
     //Set Enemy values
     enemy1.x = 15;
@@ -381,6 +383,7 @@ void setupPlayers(void) {
     enemy1.tarY = REDY;
     enemy1.inPlay = TRUE;
     enemy1.dotCount = 0;
+    enemy1.dotLimit = 0;
 
     enemy2.x = 17;
     enemy2.y = 16;
@@ -391,6 +394,7 @@ void setupPlayers(void) {
     enemy2.tarY = PINKY;
     enemy2.inPlay = FALSE;
     enemy2.dotCount = 0;
+    enemy2.dotLimit = 0;
 
     enemy3.x = 17;
     enemy3.y = 17;
@@ -401,6 +405,7 @@ void setupPlayers(void) {
     enemy3.tarY = CYANY;
     enemy3.inPlay = FALSE;
     enemy3.dotCount = 0;
+    enemy3.dotLimit = 30;
 
     enemy4.x = 14;
     enemy4.y = 17;
@@ -411,6 +416,7 @@ void setupPlayers(void) {
     enemy4.tarY = ORANGEY;
     enemy4.inPlay = FALSE;
     enemy4.dotCount = 0;
+    enemy4.dotLimit = 60;
 
     enemyMode = SCATTER;
 }
@@ -559,6 +565,8 @@ int main(int argn, char **argv)
         
         //Enemy dot counters
         checkDots(&enemy2);
+        checkDots(&enemy3);
+        checkDots(&enemy4);
         
         SDL_Delay(1);
         /* End of game animation */
