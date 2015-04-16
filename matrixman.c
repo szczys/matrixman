@@ -41,6 +41,7 @@ uint8_t enemyMode;
 static const uint16_t behaviors[] = {
     //In milliseconds
     7000, 20000, 7000, 20000, 5000, 20000, 10, 0 //trailing zero is a hack
+    //TODO: add more behaviors for advancing levels (seriously that's never going to happen)
 };
 
 //Directions of travel
@@ -321,15 +322,15 @@ void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn
     }
 }
 
-void checkDots(void) {
+void checkDots(struct Player *pawn) {
     //TODO: Add dot counters for all enemies (enemy2 is always zero)
-    if (enemy2.inPlay == FALSE) {
-        displayPixel(enemy2.x, enemy2.y, BLACK); //erase current locaiton
-        enemy2.x = 18;
-        enemy2.y = 14;
-        displayPixel(enemy2.x, enemy2.y, enemy2.color); //Draw new locaiton
-        enemy2.inPlay = TRUE;
-        enemy2.travelDir = LEFT; //TODO: shouldn't need to reset direction here
+    if (pawn->inPlay == FALSE) {
+        displayPixel(pawn->x, pawn->y, BLACK); //erase current locaiton
+        pawn->x = 18;
+        pawn->y = 14;
+        displayPixel(pawn->x, pawn->y, pawn->color); //Draw new locaiton
+        pawn->inPlay = TRUE;
+        pawn->travelDir = LEFT; //TODO: shouldn't need to reset direction here
     }
 }
 
@@ -526,7 +527,7 @@ int main(int argn, char **argv)
         }
         
         //Enemy dot counters
-        checkDots();
+        checkDots(&enemy2);
         
         SDL_Delay(1);
         /* End of game animation */
