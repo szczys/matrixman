@@ -4,7 +4,6 @@
 #include "dots.h"
 
 uint32_t dotTracker[36];
-uint8_t gobbleCount = 0;
 
 //SDL2 variables
 void* nullptr;
@@ -23,7 +22,9 @@ struct Player {
     int8_t speed;       //Currently unused
     uint8_t travelDir;  //Uses directional defines below
     uint8_t color;      //Uses color defines below
-    uint8_t inPlay;
+    uint8_t inPlay;     //On the hunt = TRUE, in reserve = FALSE
+    uint8_t dotCount;   /*For player tracks level completion
+                          For enemy decides when to go inPlay*/
 };
 
 struct Player myGuy;
@@ -123,6 +124,32 @@ uint8_t canMove(uint8_t nextX, uint8_t nextY) {
     else return 1;
 }
 
+void gobbleCount(void) {
+    myGuy.dotCount += 1;
+    printf("myGuy.dotCount: %d\n",myGuy.dotCount);
+    
+    if (enemy1.inPlay == FALSE) {
+        enemy1.dotCount += 1;
+        printf("enemy1.dotCount: %d\n", enemy1.dotCount);
+        return;
+    }
+    if (enemy2.inPlay == FALSE) {
+        enemy2.dotCount += 1;
+        printf("enemy2.dotCount: %d\n", enemy2.dotCount);
+        return;
+    }
+    if (enemy3.inPlay == FALSE) {
+        enemy3.dotCount += 1;
+        printf("enemy3.dotCount: %d\n", enemy3.dotCount);
+        return;
+    }
+    if (enemy4.inPlay == FALSE) {
+        enemy4.dotCount += 1;
+        printf("enemy4.dotCount: %d\n", enemy4.dotCount);
+        return;
+    }
+}
+
 void movePlayer(struct Player *pawn) {
     uint8_t testX = pawn->x;
     uint8_t testY = pawn->y;
@@ -158,9 +185,8 @@ void movePlayer(struct Player *pawn) {
         SDL_RenderPresent(ren);
         //gobble the dot
         if ((pawn == &myGuy) && (dotTracker[pawn->y] & (1<<(31-pawn->x)))) {
-            ++gobbleCount;
-            printf("gobbleCount: %d\n", gobbleCount);
-            dotTracker[pawn->y] &= ~(1<<(31-pawn->x));
+            dotTracker[pawn->y] &= ~(1<<(31-pawn->x));  //Remove dot from the board
+            gobbleCount();  //Increment dotCounts
         }
     }
 }
@@ -342,6 +368,7 @@ void setupPlayers(void) {
     myGuy.color = YELLOW;
     myGuy.tarX = ORANGEX;
     myGuy.tarY = ORANGEY;
+    myGuy.dotCount = 0;
     
     //Set Enemy values
     enemy1.x = 15;
@@ -352,6 +379,7 @@ void setupPlayers(void) {
     enemy1.tarX = REDX;
     enemy1.tarY = REDY;
     enemy1.inPlay = TRUE;
+    enemy1.dotCount = 0;
 
     enemy2.x = 17;
     enemy2.y = 16;
@@ -361,6 +389,7 @@ void setupPlayers(void) {
     enemy2.tarX = PINKX;
     enemy2.tarY = PINKY;
     enemy2.inPlay = FALSE;
+    enemy2.dotCount = 0;
 
     enemy3.x = 17;
     enemy3.y = 17;
@@ -370,6 +399,7 @@ void setupPlayers(void) {
     enemy3.tarX = CYANX;
     enemy3.tarY = CYANY;
     enemy3.inPlay = FALSE;
+    enemy3.dotCount = 0;
 
     enemy4.x = 14;
     enemy4.y = 17;
@@ -379,6 +409,7 @@ void setupPlayers(void) {
     enemy4.tarX = ORANGEX;
     enemy4.tarY = ORANGEY;
     enemy4.inPlay = FALSE;
+    enemy4.dotCount = 0;
 
     enemyMode = SCATTER;
 }
