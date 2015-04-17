@@ -284,8 +284,11 @@ void routeChoice(Player *pawn) {
     route2 = 6000;
     route3 = 6000;
     
-    /*TODO: Fix this dirty hack */
-    if (enemyMode == FRIGHT) {
+    /*TODO: Fix this dirty hack 
+        This whole block is ineloquent
+        Check for "GREEN" color is workaround for retreating in FRIGHT mode         
+    */
+    if ((enemyMode == FRIGHT) && (pawn->color != GREEN)) {
         //Enemies choose route randomly in this mode
         uint8_t findingPath = TRUE;
         while(findingPath) {
@@ -559,6 +562,12 @@ uint8_t wasEaten(Player *player, Player *pawn) {
     return FALSE;
 }
 
+void performRetreat(Player *pawn) {
+    pawn->color = GREEN;
+    pawn->tarX = 15;
+    pawn->tarY = 14;
+}
+
 void checkEaten(void) {
     if (enemyMode != FRIGHT) {
         if (wasEaten(&myGuy, &enemy1) ||
@@ -573,6 +582,11 @@ void checkEaten(void) {
     }
     //TODO: Else statement here for fright mode ghost gobbled
     else {
+        //Enemies should change color and go home when eaten
+        if (wasEaten(&myGuy, &enemy1)) { performRetreat(&enemy1); }
+        if (wasEaten(&myGuy, &enemy2)) { performRetreat(&enemy2); }
+        if (wasEaten(&myGuy, &enemy3)) { performRetreat(&enemy3); }
+        if (wasEaten(&myGuy, &enemy4)) { performRetreat(&enemy4); }
         
     }
 }
