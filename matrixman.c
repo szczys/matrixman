@@ -39,6 +39,7 @@ uint8_t enemyMode;
 //enemyMode types
 #define SCATTER 0
 #define CHASE 1
+#define FRIGHT 2
 
 static const uint16_t behaviors[] = {
     //In milliseconds
@@ -441,6 +442,11 @@ void changeBehavior(uint8_t mode) {
     }
 }
 
+uint8_t wasEaten(struct Player *player, struct Player *pawn) {
+    if ((player->x == pawn->x) && (player->y == pawn->y)) { return TRUE; }
+    return FALSE;
+}
+
 int main(int argn, char **argv)
 {
     printf("Hello world!\n");
@@ -557,6 +563,19 @@ int main(int argn, char **argv)
 
             playerRoute(&myGuy, nextDir);        //see if player wanted direction change
             movePlayer(&myGuy); //move player
+            
+            if (enemyMode != FRIGHT) {
+                if (wasEaten(&myGuy, &enemy1) ||
+                    wasEaten(&myGuy, &enemy2) ||
+                    wasEaten(&myGuy, &enemy3) ||
+                    wasEaten(&myGuy, &enemy4))
+                {
+                    //Game over
+                    printf("Game Over\nScore: %d\n\n", myGuy.dotCount * 10);
+                    gameRunning = FALSE;
+                }
+            }
+            //TODO: Else statement here for fright mode ghost gobbled        
             
 
             //TODO: Reset counter (this should be interrupts when in hardware
