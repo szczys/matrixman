@@ -163,6 +163,20 @@ void gobbleCount(void) {
     }
 }
 
+uint8_t isPixel(uint8_t x, uint8_t y) {
+    if (dotTracker[y] & 1<<(31-x)) { return TRUE; }
+    return FALSE;
+}
+
+uint8_t isPowerPixel(uint8_t x, uint8_t y) {
+    if ((x == PP1COL) || (x == PP2COL)) {
+        if ((y == PP1ROW) || (y == PP2ROW)) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 void movePlayer(struct Player *pawn) {
     uint8_t testX = pawn->x;
     uint8_t testY = pawn->y;
@@ -185,7 +199,10 @@ void movePlayer(struct Player *pawn) {
     //is next space unoccupied?
     if (canMove(testX, testY)) {
         //erase player at current spot (redraw dot if necessary)
-        if (dotTracker[pawn->y] & 1<<(31-pawn->x)) { displayPixel(pawn->x, pawn->y, GREY); }
+        if (isPixel(pawn->x, pawn->y)) { 
+            if (isPowerPixel(pawn->x, pawn->y)) { displayPixel(pawn->x, pawn->y, WHITE); }
+            else { displayPixel(pawn->x, pawn->y, GREY); }
+        }
         else { displayPixel(pawn->x, pawn->y, BLACK); }
         //Tunnel Tests
         if ((testY == 17) && (testX == 1)) { testX = 29; }
@@ -492,15 +509,6 @@ void reverseDir(struct Player *pawn) {
             pawn->travelDir = LEFT;
             break;
     }
-}
-
-uint8_t isPowerPixel(uint8_t x, uint8_t y) {
-    if ((x == PP1COL) || (x == PP2COL)) {
-        if ((y == PP1ROW) || (y == PP2ROW)) {
-            return TRUE;
-        }
-    }
-    return FALSE;
 }
 
 int main(int argn, char **argv)
