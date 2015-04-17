@@ -55,24 +55,32 @@ static const uint16_t behaviors[] = {
 #define RIGHT   3
 
 //Enemy Data
-#define REDX 27
-#define REDY 0
-#define PINKX 4
-#define PINKY 0
+#define REDX    27
+#define REDY    0
+#define PINKX   4
+#define PINKY   0
 #define ORANGEX 2
 #define ORANGEY 35
-#define CYANX 29
-#define CYANY 35
+#define CYANX   29
+#define CYANY   35
+
+//PowerPixel rows and columns
+#define PP1COL    3
+#define PP2COL    28
+#define PP1ROW    6
+#define PP2ROW    26
+
 
 //Color definitions
-#define BLUE 0
-#define YELLOW 1
-#define RED 2
-#define PINK 3
-#define ORANGE 4
-#define CYAN 5
-#define BLACK 6
-#define GREY 7
+#define BLUE    0
+#define YELLOW  1
+#define RED     2
+#define PINK    3
+#define ORANGE  4
+#define CYAN    5
+#define BLACK   6
+#define GREY    7
+#define WHITE   8
 
 //Color values
 static const uint8_t colors[][3] = {
@@ -83,7 +91,8 @@ static const uint8_t colors[][3] = {
     { 255, 102, 0 },    //Orange
     { 0, 255, 255 },    //Cyan
     { 0, 0, 0 },        //Black
-    { 64, 64, 64 }      //Grey
+    { 64, 64, 64 },     //Grey
+    { 255, 255, 255 }   //White
 };
 
 void initDisplay(void) {
@@ -485,6 +494,15 @@ void reverseDir(struct Player *pawn) {
     }
 }
 
+uint8_t isPowerPixel(uint8_t x, uint8_t y) {
+    if ((x == PP1COL) || (x == PP2COL)) {
+        if ((y == PP1ROW) || (y == PP2ROW)) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 int main(int argn, char **argv)
 {
     printf("Hello world!\n");
@@ -518,6 +536,12 @@ int main(int argn, char **argv)
             }
         }        
     }
+    
+    //Draw PowerPixels
+    displayPixel(PP1COL, PP1ROW, WHITE);
+    displayPixel(PP1COL, PP2ROW, WHITE);
+    displayPixel(PP2COL, PP1ROW, WHITE);
+    displayPixel(PP2COL, PP2ROW, WHITE);
 
     //Draw the player
     displayPixel(myGuy.x, myGuy.y, myGuy.color);
