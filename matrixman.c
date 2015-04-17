@@ -236,7 +236,7 @@ void routeChoice(struct Player *pawn) {
 
     //Test for four intersections where turning upward is forbidden
     if (((testX == 14) || (testX == 17)) 
-        && ((testY == 14) || (testY == 27))
+        && ((testY == 14) || (testY == 26))
         && pawn->travelDir != DOWN) { printf("no turning up\n"); return; }
 
     //Set 3 distances then choose the shortest
