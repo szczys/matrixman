@@ -14,7 +14,7 @@ SDL_Renderer *ren;
 #define FALSE 0
 
 //Player Variables
-struct Player { 
+typedef struct Player { 
     uint8_t x;          //Position on the game surface, 0 is left
     uint8_t y;          //Position on the game surface, 0 is top
     uint8_t tarX;       //Target X coord. for enemy
@@ -26,13 +26,13 @@ struct Player {
     uint8_t dotCount;   /*For player tracks level completion
                           For enemy decides when to go inPlay*/
     uint8_t dotLimit;   //How many dots before this enemy is inPlay
-};
+} Player;
 
-struct Player myGuy;
-struct Player enemy1;
-struct Player enemy2;
-struct Player enemy3;
-struct Player enemy4;
+Player myGuy;
+Player enemy1;
+Player enemy2;
+Player enemy3;
+Player enemy4;
 
 uint8_t enemyMode;
 uint8_t gameRunning;
@@ -82,6 +82,7 @@ static const uint16_t behaviors[] = {
 #define GREY    7
 #define WHITE   8
 #define LAVENDAR  9
+#define GREEN   10
 
 //Color values
 static const uint8_t colors[][3] = {
@@ -94,7 +95,8 @@ static const uint8_t colors[][3] = {
     { 0, 0, 0 },        //Black
     { 64, 64, 64 },     //Grey
     { 255, 255, 255 },  //White
-    { 196, 64, 255}     //Lavendar
+    { 196, 64, 255},    //Lavendar
+    { 0, 255, 0}        //Green
 };
 
 void initDisplay(void) {
@@ -134,9 +136,9 @@ void displayPixel(uint8_t x, uint8_t y, char color) {
 //Function returns 1 if next move is not a collision with the board
 uint8_t canMove(uint8_t nextX, uint8_t nextY) {
     if (board[nextY] & (1<<(31-nextX))) {
-        return 0;
+        return FALSE;
     }
-    else return 1;
+    else return TRUE;
 }
 
 void gobbleCount(void) {
@@ -179,7 +181,7 @@ uint8_t isPowerPixel(uint8_t x, uint8_t y) {
     return FALSE;
 }
 
-void movePlayer(struct Player *pawn) {
+void movePlayer(Player *pawn) {
     uint8_t testX = pawn->x;
     uint8_t testY = pawn->y;
 
@@ -239,7 +241,7 @@ uint16_t getDistance(uint8_t x, uint8_t y, uint8_t targetX, uint8_t targetY) {
     return (hor * hor) + (vert * vert);
 }
 
-void playerRoute(struct Player *pawn, uint8_t nextDir) {
+void playerRoute(Player *pawn, uint8_t nextDir) {
     if (nextDir == pawn->travelDir) return;
 
     uint8_t testX = pawn->x;
@@ -262,7 +264,7 @@ void playerRoute(struct Player *pawn, uint8_t nextDir) {
     if (canMove(testX, testY)) { pawn->travelDir = nextDir; }   
 }
 
-void routeChoice(struct Player *pawn) {
+void routeChoice(Player *pawn) {
     //This function is only used for enemies. NEVER for the player
     //TODO: This function works but seems overly complex
     
@@ -374,7 +376,7 @@ void routeChoice(struct Player *pawn) {
     }
 }
 
-void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn2, struct Player *pawn3, struct Player *pawn4) {
+void setTargets(Player *player, Player *pawn1, Player *pawn2, Player *pawn3, Player *pawn4) {
     if (enemyMode != CHASE) { return; }
 
     /*--------------- Enemy1 ------------------*/
@@ -430,7 +432,7 @@ void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn
     }
 }
 
-void checkDots(struct Player *pawn) {
+void checkDots(Player *pawn) {
     //TODO: Add dot counters for all enemies (enemy2 is always zero)
     if ((pawn->inPlay == FALSE) && (pawn->dotCount >= pawn->dotLimit)) {
         displayPixel(pawn->x, pawn->y, BLACK); //erase current locaiton
@@ -502,7 +504,7 @@ void setupPlayers(void) {
     enemyMode = SCATTER;
 }
 
-void reverseDir(struct Player *pawn) {
+void reverseDir(Player *pawn) {
     switch(pawn->travelDir) {
         case UP:
             pawn->travelDir = DOWN;
@@ -552,7 +554,7 @@ void changeBehavior(uint8_t mode) {
     reverseDir(&enemy4);
 }
 
-uint8_t wasEaten(struct Player *player, struct Player *pawn) {
+uint8_t wasEaten(Player *player, Player *pawn) {
     if ((player->x == pawn->x) && (player->y == pawn->y)) { return TRUE; }
     return FALSE;
 }
@@ -570,6 +572,9 @@ void checkEaten(void) {
         }
     }
     //TODO: Else statement here for fright mode ghost gobbled
+    else {
+        
+    }
 }
 
 int main(int argn, char **argv)
@@ -583,7 +588,6 @@ int main(int argn, char **argv)
     
     //Draw the board
     for (uint16_t i = 2; i < 34; i++) {
-        printf("Loop %d\n",i);
         for (uint16_t j = 0; j<32; j++) {
             if (board[i] & (1<<(31-j))) {    //Invert the x (big endian)
                 displayPixel(j, i, BLUE); 
@@ -599,7 +603,6 @@ int main(int argn, char **argv)
     for (uint16_t i = 2; i < 34; i++) {
         //Copy the dots to the dotTracker
         dotTracker[i] = dots[i];
-        printf("Loop %d\n",i);
         for (uint16_t j = 0; j<32; j++) {
             if (dots[i] & (1<<(31-j))) {    //Invert the x (big endian)
                 displayPixel(j, i, GREY); 
@@ -673,7 +676,7 @@ int main(int argn, char **argv)
                 behaviorIndex++;
                 behaviorTicks = 0;
                 
-                //TODO: We're about to behavior switch, all enemys should change direction
+                //TODO: This should change if PowerPixel mode time is still going
                 
                 if (behaviorIndex % 2) { changeBehavior(CHASE); }
                 else { changeBehavior(SCATTER); }
