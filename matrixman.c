@@ -14,7 +14,8 @@ SDL_Renderer *ren;
 #define FALSE 0
 
 //Player Variables
-typedef struct Player { 
+typedef struct Player {
+    uint8_t id;         //Index used to find stored values
     uint8_t x;          //Position on the game surface, 0 is left
     uint8_t y;          //Position on the game surface, 0 is top
     uint8_t tarX;       //Target X coord. for enemy
@@ -26,6 +27,8 @@ typedef struct Player {
     uint8_t dotCount;   /*For player tracks level completion
                           For enemy decides when to go inPlay*/
     uint8_t dotLimit;   //How many dots before this enemy is inPlay
+    uint8_t scatterX;
+    uint8_t scatterY;
 } Player;
 
 Player myGuy;
@@ -54,23 +57,6 @@ static const uint16_t behaviors[] = {
 #define LEFT    2
 #define RIGHT   3
 
-//Enemy Data
-#define REDX    27
-#define REDY    0
-#define PINKX   4
-#define PINKY   0
-#define ORANGEX 2
-#define ORANGEY 35
-#define CYANX   29
-#define CYANY   35
-
-//PowerPixel rows and columns
-#define PP1COL    3
-#define PP2COL    28
-#define PP1ROW    6
-#define PP2ROW    26
-
-
 //Color definitions
 #define BLUE    0
 #define YELLOW  1
@@ -98,6 +84,25 @@ static const uint8_t colors[][3] = {
     { 196, 64, 255},    //Lavendar
     { 0, 255, 0}        //Green
 };
+
+//Enemy Data
+const uint8_t enemyColor[4] = { RED, PINK, CYAN, ORANGE };
+#define REDX    27
+#define REDY    0
+#define PINKX   4
+#define PINKY   0
+#define ORANGEX 2
+#define ORANGEY 35
+#define CYANX   29
+#define CYANY   35
+#define RETREATX    15
+#define RETREATY    14
+
+//PowerPixel rows and columns
+#define PP1COL    3
+#define PP2COL    28
+#define PP1ROW    6
+#define PP2ROW    26
 
 void initDisplay(void) {
 
@@ -185,19 +190,29 @@ void movePlayer(Player *pawn) {
     uint8_t testX = pawn->x;
     uint8_t testY = pawn->y;
 
-    switch (pawn->travelDir) {
-        case UP:
-            testY--;
-            break;
-        case DOWN:
-            testY++;
-            break;
-        case LEFT:
-            testX--;
-            break;
-        case RIGHT:
-            testX++;
-            break;
+    if ((pawn->color == GREEN) && (pawn->x == RETREATX) && (pawn->y == RETREATY)) {
+        printf("Back Home\n");
+        //Gobbled enemy has made it home, put it in the house
+        displayPixel(pawn->x, pawn->y, BLACK);
+        enterHouse(pawn);
+        displayPixel(pawn->x, pawn->y, pawn->color);
+        return;
+    }
+    else {
+        switch (pawn->travelDir) {
+            case UP:
+                testY--;
+                break;
+            case DOWN:
+                testY++;
+                break;
+            case LEFT:
+                testX--;
+                break;
+            case RIGHT:
+                testX++;
+                break;
+        }
     }
 
     //is next space unoccupied?
@@ -449,6 +464,7 @@ void checkDots(Player *pawn) {
 
 void setupPlayers(void) {
     //Set Player values
+    myGuy.id = 0;
     myGuy.x = 15;
     myGuy.y = 26;
     myGuy.speed = 10; //Currently unused
@@ -460,6 +476,7 @@ void setupPlayers(void) {
     myGuy.dotLimit = 0;
     
     //Set Enemy values
+    enemy1.id = 1;
     enemy1.x = 15;
     enemy1.y = 14;
     enemy1.speed = 10; //Currently unused
@@ -470,7 +487,10 @@ void setupPlayers(void) {
     enemy1.inPlay = TRUE;
     enemy1.dotCount = 0;
     enemy1.dotLimit = 0;
+    enemy1.scatterX = REDX;
+    enemy1.scatterY = REDY;
 
+    enemy2.id = 2;
     enemy2.x = 17;
     enemy2.y = 16;
     enemy2.speed = 10; //Currently unused
@@ -481,7 +501,10 @@ void setupPlayers(void) {
     enemy2.inPlay = FALSE;
     enemy2.dotCount = 0;
     enemy2.dotLimit = 0;
+    enemy2.scatterX = PINKX;
+    enemy2.scatterY = PINKY;
 
+    enemy3.id = 3;
     enemy3.x = 17;
     enemy3.y = 17;
     enemy3.speed = 10; //Currently unused
@@ -492,7 +515,10 @@ void setupPlayers(void) {
     enemy3.inPlay = FALSE;
     enemy3.dotCount = 0;
     enemy3.dotLimit = 30;
+    enemy3.scatterX = CYANX;
+    enemy3.scatterY = CYANY;
 
+    enemy4.id = 4;
     enemy4.x = 14;
     enemy4.y = 17;
     enemy4.speed = 10; //Currently unused
@@ -503,6 +529,8 @@ void setupPlayers(void) {
     enemy4.inPlay = FALSE;
     enemy4.dotCount = 0;
     enemy4.dotLimit = 60;
+    enemy4.scatterX = ORANGEX;
+    enemy4.scatterY = ORANGEY;
 
     enemyMode = SCATTER;
 }
@@ -564,8 +592,16 @@ uint8_t wasEaten(Player *player, Player *pawn) {
 
 void performRetreat(Player *pawn) {
     pawn->color = GREEN;
-    pawn->tarX = 15;
-    pawn->tarY = 14;
+    pawn->tarX = RETREATX;
+    pawn->tarY = RETREATY;
+}
+
+void enterHouse(Player *pawn) {
+    pawn->color = enemyColor[pawn->id];
+    pawn->x = RETREATX;
+    pawn->y = RETREATY+2;
+    pawn->tarX = pawn->scatterX;
+    pawn->tarY = pawn->scatterY;
 }
 
 void checkEaten(void) {
