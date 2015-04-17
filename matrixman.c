@@ -35,6 +35,7 @@ struct Player enemy3;
 struct Player enemy4;
 
 uint8_t enemyMode;
+uint8_t gameRunning;
 
 //enemyMode types
 #define SCATTER 0
@@ -452,6 +453,21 @@ uint8_t wasEaten(struct Player *player, struct Player *pawn) {
     return FALSE;
 }
 
+void checkEaten(void) {
+    if (enemyMode != FRIGHT) {
+        if (wasEaten(&myGuy, &enemy1) ||
+            wasEaten(&myGuy, &enemy2) ||
+            wasEaten(&myGuy, &enemy3) ||
+            wasEaten(&myGuy, &enemy4))
+        {
+            //Game over
+            printf("Game Over\nScore: %d\n\n", myGuy.dotCount * 10);
+            gameRunning = FALSE;
+        }
+    }
+    //TODO: Else statement here for fright mode ghost gobbled
+}
+
 void reverseDir(struct Player *pawn) {
     switch(pawn->travelDir) {
         case UP:
@@ -508,7 +524,7 @@ int main(int argn, char **argv)
     SDL_RenderPresent(ren);
     
     SDL_Event event;
-    uint8_t gameRunning = 1;
+    gameRunning = TRUE;
     uint16_t ticks = 0;
     uint16_t behaviorTicks = 0;
     uint8_t behaviorIndex = 0;
@@ -583,22 +599,12 @@ int main(int argn, char **argv)
             movePlayer(&enemy3);
             movePlayer(&enemy4);
 
+            checkEaten();   //Did an enemy enter the player's square?
+            
             playerRoute(&myGuy, nextDir);        //see if player wanted direction change
             movePlayer(&myGuy); //move player
             
-            if (enemyMode != FRIGHT) {
-                if (wasEaten(&myGuy, &enemy1) ||
-                    wasEaten(&myGuy, &enemy2) ||
-                    wasEaten(&myGuy, &enemy3) ||
-                    wasEaten(&myGuy, &enemy4))
-                {
-                    //Game over
-                    printf("Game Over\nScore: %d\n\n", myGuy.dotCount * 10);
-                    gameRunning = FALSE;
-                }
-            }
-            //TODO: Else statement here for fright mode ghost gobbled        
-            
+            checkEaten();   //Did the player enter an enemy's square?
 
             //TODO: Reset counter (this should be interrupts when in hardware
             ticks = 0;
