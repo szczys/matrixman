@@ -81,6 +81,7 @@ static const uint16_t behaviors[] = {
 #define BLACK   6
 #define GREY    7
 #define WHITE   8
+#define LAVENDAR  9
 
 //Color values
 static const uint8_t colors[][3] = {
@@ -92,7 +93,8 @@ static const uint8_t colors[][3] = {
     { 0, 255, 255 },    //Cyan
     { 0, 0, 0 },        //Black
     { 64, 64, 64 },     //Grey
-    { 255, 255, 255 }   //White
+    { 255, 255, 255 },  //White
+    { 196, 64, 255}     //Lavendar
 };
 
 void initDisplay(void) {
@@ -214,9 +216,13 @@ void movePlayer(struct Player *pawn) {
         displayPixel(pawn->x, pawn->y, pawn->color);
         SDL_RenderPresent(ren);
         //gobble the dot
-        if ((pawn == &myGuy) && (dotTracker[pawn->y] & (1<<(31-pawn->x)))) {
+        if ((pawn == &myGuy) && isPixel(pawn->x,pawn->y)) {
             dotTracker[pawn->y] &= ~(1<<(31-pawn->x));  //Remove dot from the board
             gobbleCount();  //Increment dotCounts
+            if (isPowerPixel(pawn->x, pawn->y)) {
+                //Switch to Fright mode
+                changeBehavior(FRIGHT);
+            }
         }
     }
 }
@@ -449,6 +455,23 @@ void setupPlayers(void) {
     enemyMode = SCATTER;
 }
 
+void reverseDir(struct Player *pawn) {
+    switch(pawn->travelDir) {
+        case UP:
+            pawn->travelDir = DOWN;
+            break;
+        case DOWN:
+            pawn->travelDir = UP;
+            break;
+        case LEFT:
+            pawn->travelDir = RIGHT;
+            break;
+        case RIGHT:
+            pawn->travelDir = LEFT;
+            break;
+    }
+}
+
 void changeBehavior(uint8_t mode) {
     switch(mode) {
         case SCATTER:
@@ -465,6 +488,13 @@ void changeBehavior(uint8_t mode) {
             break;
         case CHASE:
             enemyMode = CHASE;
+            break;
+        case FRIGHT:
+            //Fix colors
+            enemy1.color = LAVENDAR;
+            enemy2.color = LAVENDAR;
+            enemy3.color = LAVENDAR;
+            enemy4.color = LAVENDAR;
             break;
     }
     //Enemies should reverse current direction when modes change
@@ -492,23 +522,6 @@ void checkEaten(void) {
         }
     }
     //TODO: Else statement here for fright mode ghost gobbled
-}
-
-void reverseDir(struct Player *pawn) {
-    switch(pawn->travelDir) {
-        case UP:
-            pawn->travelDir = DOWN;
-            break;
-        case DOWN:
-            pawn->travelDir = UP;
-            break;
-        case LEFT:
-            pawn->travelDir = RIGHT;
-            break;
-        case RIGHT:
-            pawn->travelDir = LEFT;
-            break;
-    }
 }
 
 int main(int argn, char **argv)
