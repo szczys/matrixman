@@ -451,7 +451,6 @@ void setTargets(Player *player, Player *pawn1, Player *pawn2, Player *pawn3, Pla
 }
 
 void checkDots(Player *pawn) {
-    //TODO: Add dot counters for all enemies (enemy2 is always zero)
     if ((pawn->inPlay == FALSE) && (pawn->dotCount >= pawn->dotLimit)) {
         displayPixel(pawn->x, pawn->y, BLACK); //erase current locaiton
         pawn->x = 18;
@@ -629,6 +628,11 @@ void checkEaten(void) {
 
 int main(int argn, char **argv)
 {
+    //TODO: Level change: Update dot counters by level
+    //TODO: Level change: Player and enemy speed changes
+    //TODO: power pellets and edible ghosts
+
+
     printf("Hello world!\n");
     
 
