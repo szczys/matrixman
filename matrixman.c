@@ -440,11 +440,33 @@ void changeBehavior(uint8_t mode) {
             enemyMode = CHASE;
             break;
     }
+    //Enemies should reverse current direction when modes change
+    reverseDir(&enemy1);
+    reverseDir(&enemy2);
+    reverseDir(&enemy3);
+    reverseDir(&enemy4);
 }
 
 uint8_t wasEaten(struct Player *player, struct Player *pawn) {
     if ((player->x == pawn->x) && (player->y == pawn->y)) { return TRUE; }
     return FALSE;
+}
+
+void reverseDir(struct Player *pawn) {
+    switch(pawn->travelDir) {
+        case UP:
+            pawn->travelDir = DOWN;
+            break;
+        case DOWN:
+            pawn->travelDir = UP;
+            break;
+        case LEFT:
+            pawn->travelDir = RIGHT;
+            break;
+        case RIGHT:
+            pawn->travelDir = LEFT;
+            break;
+    }
 }
 
 int main(int argn, char **argv)
