@@ -263,6 +263,9 @@ void playerRoute(struct Player *pawn, uint8_t nextDir) {
 }
 
 void routeChoice(struct Player *pawn) {
+    //This function is only used for enemies. NEVER for the player
+    //TODO: This function works but seems overly complex
+    
     //Does the pawn have a choice of routes right now?
     uint8_t testX = pawn->x;
     uint8_t testY = pawn->y;
@@ -278,6 +281,50 @@ void routeChoice(struct Player *pawn) {
     route1 = 6000;
     route2 = 6000;
     route3 = 6000;
+    
+    /*TODO: Fix this dirty hack */
+    if (enemyMode == FRIGHT) {
+        //Enemies choose route randomly in this mode
+        uint8_t findingPath = TRUE;
+        while(findingPath) {
+            switch(rand()%4) {
+                case UP:
+                    if ((pawn->travelDir != DOWN) &&
+                            canMove(testX,testY-1))
+                    {
+                        pawn->travelDir = UP;
+                        findingPath = FALSE;
+                    }
+                    break;
+                case DOWN:
+                    if ((pawn->travelDir != UP) &&
+                            canMove(testX,testY+1))
+                    {
+                        pawn->travelDir = DOWN;
+                        findingPath = FALSE;
+                    }
+                    break;
+                case LEFT:
+                    if ((pawn->travelDir != RIGHT) &&
+                            canMove(testX-1,testY))
+                    {
+                        pawn->travelDir = LEFT;
+                        findingPath = FALSE;
+                    }
+                    break;
+                case RIGHT:
+                    if ((pawn->travelDir != LEFT) &&
+                            canMove(testX+1,testY))
+                    {
+                        pawn->travelDir = RIGHT;
+                        findingPath = FALSE;
+                    }
+                    break;
+            }
+        }
+        return;
+    }
+    /*---end of dirty hack*/ 
 
     switch(pawn->travelDir) {
         case UP:
@@ -328,7 +375,7 @@ void routeChoice(struct Player *pawn) {
 }
 
 void setTargets(struct Player *player, struct Player *pawn1, struct Player *pawn2, struct Player *pawn3, struct Player *pawn4) {
-    if (enemyMode == SCATTER) { return; }
+    if (enemyMode != CHASE) { return; }
 
     /*--------------- Enemy1 ------------------*/
     pawn1->tarX = player->x;
@@ -490,6 +537,7 @@ void changeBehavior(uint8_t mode) {
             enemyMode = CHASE;
             break;
         case FRIGHT:
+            enemyMode = FRIGHT;
             //Fix colors
             enemy1.color = LAVENDAR;
             enemy2.color = LAVENDAR;
@@ -527,6 +575,7 @@ void checkEaten(void) {
 int main(int argn, char **argv)
 {
     printf("Hello world!\n");
+    
 
     setupPlayers(); //set initial values for player and enemies
     
