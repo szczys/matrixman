@@ -84,7 +84,7 @@ static const uint8_t colors[][3] = {
 };
 
 //Enemy Data
-const uint8_t enemyColor[5] = { YELLOW, RED, PINK, CYAN, ORANGE };
+const uint8_t playerColor[5] = { YELLOW, RED, PINK, CYAN, ORANGE };
 const uint8_t startingX[5] = { 15, 15, 17, 17, 14 };
 const uint8_t startingY[5] = { 26, 14, 16, 17, 17 };
     //Player doesn't have scatter so 0 index is retreat coordinates
@@ -471,69 +471,17 @@ void checkDots(Player *pawn) {
     }
 }
 
-void setupPlayers(void) {
-    //Set Player values
-    myGuy.id = 0;
-    myGuy.x = 15;
-    myGuy.y = 26;
-    myGuy.speed = 10; //Currently unused
-    myGuy.travelDir = LEFT;
-    myGuy.color = YELLOW;
-    myGuy.tarX = scatterX[myGuy.id];
-    myGuy.tarY = scatterY[myGuy.id];
-    myGuy.dotCount = 0;
-    myGuy.dotLimit = 0;
-    
-    //Set Enemy values
-    enemy1.id = 1;
-    enemy1.x = 15;
-    enemy1.y = 14;
-    enemy1.speed = 10; //Currently unused
-    enemy1.travelDir = LEFT;
-    enemy1.color = RED;
-    enemy1.tarX = scatterX[enemy1.id];
-    enemy1.tarY = scatterY[enemy1.id];
-    enemy1.inPlay = TRUE;
-    enemy1.dotCount = 0;
-    enemy1.dotLimit = 0;
-
-    enemy2.id = 2;
-    enemy2.x = 17;
-    enemy2.y = 16;
-    enemy2.speed = 10; //Currently unused
-    enemy2.travelDir = LEFT;
-    enemy2.color = PINK;
-    enemy2.tarX = scatterX[enemy2.id];
-    enemy2.tarY = scatterY[enemy2.id];
-    enemy2.inPlay = FALSE;
-    enemy2.dotCount = 0;
-    enemy2.dotLimit = 0;
-
-    enemy3.id = 3;
-    enemy3.x = 17;
-    enemy3.y = 17;
-    enemy3.speed = 10; //Currently unused
-    enemy3.travelDir = LEFT;
-    enemy3.color = CYAN;
-    enemy3.tarX = scatterX[enemy3.id];
-    enemy3.tarY = scatterY[enemy3.id];
-    enemy3.inPlay = FALSE;
-    enemy3.dotCount = 0;
-    enemy3.dotLimit = 30;
-
-    enemy4.id = 4;
-    enemy4.x = 14;
-    enemy4.y = 17;
-    enemy4.speed = 10; //Currently unused
-    enemy4.travelDir = LEFT;
-    enemy4.color = ORANGE;
-    enemy4.tarX = scatterY[enemy4.id];
-    enemy4.tarY = scatterY[enemy4.id];
-    enemy4.inPlay = FALSE;
-    enemy4.dotCount = 0;
-    enemy4.dotLimit = 60;
-
-    enemyMode = SCATTER;
+void setupPlayer(Player *pawn, uint8_t newId, uint8_t newDotLimit) {
+    pawn->id = newId;
+    pawn->x = startingX[pawn->id];
+    pawn->y = startingY[pawn->id];
+    pawn->speed = 10; //Currently unused
+    pawn->travelDir = LEFT;
+    pawn->color = playerColor[pawn->id];
+    pawn->tarX = scatterX[pawn->id];
+    pawn->tarY = scatterY[pawn->id];
+    pawn->dotCount = 0;
+    pawn->dotLimit = newDotLimit;
 }
 
 void reverseDir(Player *pawn) {
@@ -599,7 +547,7 @@ void performRetreat(Player *pawn) {
 }
 
 void enterHouse(Player *pawn) {
-    pawn->color = enemyColor[pawn->id];
+    pawn->color = playerColor[pawn->id];
     pawn->x = scatterX[0];
     pawn->y = scatterY[0]+2;
     pawn->tarX = scatterX[pawn->id];
@@ -638,8 +586,13 @@ int main(int argn, char **argv)
 
     printf("Hello world!\n");
     
-
-    setupPlayers(); //set initial values for player and enemies
+    //set initial values for player and enemies
+    setupPlayer(&myGuy,0,0);
+    setupPlayer(&enemy1,1,0);
+    setupPlayer(&enemy2,2,0);
+    setupPlayer(&enemy3,3,30);
+    setupPlayer(&enemy4,4,60);
+    enemyMode = SCATTER;
     
     initDisplay();
     
