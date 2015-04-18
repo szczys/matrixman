@@ -1,10 +1,11 @@
 #include <stdio.h>
-#include <SDL2/SDL.h>
+#include <stdlib.h>
 #include <inttypes.h>
 #include "board.h"
 #include "dots.h"
 #include "player.h"
 #include "display.h"
+#include "control.h"
 
 uint32_t dotTracker[36];
 
@@ -31,12 +32,6 @@ static const uint16_t behaviors[] = {
     7000, 20000, 7000, 20000, 5000, 20000, 10, 0 //trailing zero is a hack
     //TODO: add more behaviors for advancing levels (seriously that's never going to happen)
 };
-
-//Directions of travel
-#define UP      0
-#define DOWN    1
-#define LEFT    2
-#define RIGHT   3
 
 //Enemy Data
 const uint8_t playerColor[5] = { YELLOW, RED, PINK, CYAN, ORANGE };
@@ -542,7 +537,6 @@ int main(int argn, char **argv)
     displayPixel(myGuy.x, myGuy.y, myGuy.color);
     displayLatch(); //Redraws display (if necessary)
     
-    SDL_Event event;
     gameRunning = TRUE;
     uint16_t ticks = 0;
     uint16_t behaviorTicks = 0;
@@ -554,37 +548,17 @@ int main(int argn, char **argv)
     {
         
         //TODO: This is all input code which need to change when ported
-        if (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
+        
+        /*---- User Input ----*/
+        uint8_t control = getControl();
+        switch (control) {
+            case NOINPUT:
+                break;
+            case ESCAPE:
                 gameRunning = 0;
-            }
-            if (event.type == SDL_KEYDOWN) {
-                SDL_Keycode keyPressed = event.key.keysym.sym;
-      
-                switch (keyPressed)
-                {
-                    case SDLK_ESCAPE:
-                        gameRunning = 0;
-                        break;
-                    case SDLK_UP:
-                        printf("Up Key Pressed\n");
-                        nextDir = UP;
-                        break;
-                    case SDLK_DOWN:
-                        printf("Down Key Pressed\n");
-                        nextDir = DOWN;
-                        break;
-                    case SDLK_LEFT:
-                        printf("Left Key Pressed\n");
-                        nextDir = LEFT;
-                        break;
-                    case SDLK_RIGHT:
-                        printf("Right Key Pressed\n");
-                        nextDir = RIGHT;
-                        break;
-                }
-            }
-         
+                continue;
+            default:
+                nextDir = control; 
         }
 
 
@@ -634,7 +608,7 @@ int main(int argn, char **argv)
         checkDots(&enemy3);
         checkDots(&enemy4);
         
-        SDL_Delay(1);
+        controlDelayMs(1);
         /* End of game animation */
 
 
