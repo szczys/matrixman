@@ -475,6 +475,7 @@ void enterHouse(Player *pawn) {
     pawn->y = scatterY[0]+2;
     pawn->tarX = scatterX[pawn->id];
     pawn->tarY = scatterY[pawn->id];
+    pawn->inPlay = FALSE;
 }
 
 void checkEaten(void) {
@@ -582,8 +583,8 @@ int main(int argn, char **argv)
         /* This animates the game */
 
         //Switch Modes
-        if ((enemyMode == FRIGHT) && (frightTimer-- <= 1)) {
-            changeBehavior(lastBehavior);
+        if (enemyMode == FRIGHT) {
+            if (frightTimer-- <= 1) { changeBehavior(lastBehavior); }
         }
         else if (behaviorTicks++ > behaviors[behaviorIndex]) {
             if (behaviors[behaviorIndex] > 0) {
