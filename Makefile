@@ -12,3 +12,4 @@ run:
 clean:
 	-rm matrixman;
 	-rm matrixman.o;
+	-rm *~
