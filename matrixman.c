@@ -21,6 +21,8 @@ Player enemy4;
 
 uint8_t enemyMode;
 uint8_t gameRunning;
+uint16_t frightTimer;
+uint8_t lastBehavior;
 
 //enemyMode types
 #define SCATTER 0
@@ -443,6 +445,9 @@ void changeBehavior(uint8_t mode) {
             enemyMode = CHASE;
             break;
         case FRIGHT:
+            //TODO: Fright timer should change as levels increase
+            frightTimer = 6000;
+            lastBehavior = enemyMode;
             enemyMode = FRIGHT;
             //Fix colors
             enemy1.color = LAVENDAR;
@@ -577,7 +582,10 @@ int main(int argn, char **argv)
         /* This animates the game */
 
         //Switch Modes
-        if (behaviorTicks++ > behaviors[behaviorIndex]) {
+        if ((enemyMode == FRIGHT) && (frightTimer-- <= 1)) {
+            changeBehavior(lastBehavior);
+        }
+        else if (behaviorTicks++ > behaviors[behaviorIndex]) {
             if (behaviors[behaviorIndex] > 0) {
                 //Checking for 0 lets us run final behavior forever
                 behaviorIndex++;
