@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include "board.h"
 #include "dots.h"
+#include "player.h"
 
 uint32_t dotTracker[36];
 
@@ -14,21 +15,6 @@ SDL_Renderer *ren;
 #define FALSE 0
 
 //Player Variables
-typedef struct Player {
-    uint8_t id;         //Index used to find stored values
-    uint8_t x;          //Position on the game surface, 0 is left
-    uint8_t y;          //Position on the game surface, 0 is top
-    uint8_t tarX;       //Target X coord. for enemy
-    uint8_t tarY;       //Target Y coord. for enemy
-    int8_t speed;       //Currently unused
-    uint8_t travelDir;  //Uses directional defines below
-    uint8_t color;      //Uses color defines below
-    uint8_t inPlay;     //On the hunt = TRUE, in reserve = FALSE
-    uint8_t dotCount;   /*For player tracks level completion
-                          For enemy decides when to go inPlay*/
-    uint8_t dotLimit;   //How many dots before this enemy is inPlay
-} Player;
-
 Player myGuy;
 Player enemy1;
 Player enemy2;
@@ -90,19 +76,6 @@ const uint8_t startingY[5] = { 26, 14, 16, 17, 17 };
     //Player doesn't have scatter so 0 index is retreat coordinates
 const uint8_t scatterX[5] = { 15, 27, 4, 2, 29 };
 const uint8_t scatterY[5] = { 14, 0, 0, 35, 35 };
-
-/*
-#define REDX    27
-#define REDY    0
-#define PINKX   4
-#define PINKY   0
-#define ORANGEX 2
-#define ORANGEY 35
-#define CYANX   29
-#define CYANY   35
-#define RETREATX    15
-#define RETREATY    14
-*/
 
 //PowerPixel rows and columns
 #define PP1COL    3
