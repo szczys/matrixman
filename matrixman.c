@@ -27,8 +27,6 @@ typedef struct Player {
     uint8_t dotCount;   /*For player tracks level completion
                           For enemy decides when to go inPlay*/
     uint8_t dotLimit;   //How many dots before this enemy is inPlay
-    uint8_t scatterX;
-    uint8_t scatterY;
 } Player;
 
 Player myGuy;
@@ -86,7 +84,14 @@ static const uint8_t colors[][3] = {
 };
 
 //Enemy Data
-const uint8_t enemyColor[4] = { RED, PINK, CYAN, ORANGE };
+const uint8_t enemyColor[5] = { YELLOW, RED, PINK, CYAN, ORANGE };
+const uint8_t startingX[5] = { 15, 15, 17, 17, 14 };
+const uint8_t startingY[5] = { 26, 14, 16, 17, 17 };
+    //Player doesn't have scatter so 0 index is retreat coordinates
+const uint8_t scatterX[5] = { 15, 27, 4, 2, 29 };
+const uint8_t scatterY[5] = { 14, 0, 0, 35, 35 };
+
+/*
 #define REDX    27
 #define REDY    0
 #define PINKX   4
@@ -97,6 +102,7 @@ const uint8_t enemyColor[4] = { RED, PINK, CYAN, ORANGE };
 #define CYANY   35
 #define RETREATX    15
 #define RETREATY    14
+*/
 
 //PowerPixel rows and columns
 #define PP1COL    3
@@ -104,6 +110,10 @@ const uint8_t enemyColor[4] = { RED, PINK, CYAN, ORANGE };
 #define PP1ROW    6
 #define PP2ROW    26
 
+/*---- Prototypes ----*/
+void enterHouse(Player *pawn);
+void changeBehavior(uint8_t mode);
+/*--------------------*/
 void initDisplay(void) {
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -190,7 +200,7 @@ void movePlayer(Player *pawn) {
     uint8_t testX = pawn->x;
     uint8_t testY = pawn->y;
 
-    if ((pawn->color == GREEN) && (pawn->x == RETREATX) && (pawn->y == RETREATY)) {
+    if ((pawn->color == GREEN) && (pawn->x == scatterX[0]) && (pawn->y == scatterY[0])) {
         printf("Back Home\n");
         //Gobbled enemy has made it home, put it in the house
         displayPixel(pawn->x, pawn->y, BLACK);
@@ -445,8 +455,8 @@ void setTargets(Player *player, Player *pawn1, Player *pawn2, Player *pawn3, Pla
         pawn4->tarY = player->y;
     }
     else {
-        pawn4->tarX = ORANGEX;
-        pawn4->tarY = ORANGEY;
+        pawn4->tarX = scatterX[pawn4->id];
+        pawn4->tarY = scatterY[pawn4->id];
     }
 }
 
@@ -469,8 +479,8 @@ void setupPlayers(void) {
     myGuy.speed = 10; //Currently unused
     myGuy.travelDir = LEFT;
     myGuy.color = YELLOW;
-    myGuy.tarX = ORANGEX;
-    myGuy.tarY = ORANGEY;
+    myGuy.tarX = scatterX[myGuy.id];
+    myGuy.tarY = scatterY[myGuy.id];
     myGuy.dotCount = 0;
     myGuy.dotLimit = 0;
     
@@ -481,13 +491,11 @@ void setupPlayers(void) {
     enemy1.speed = 10; //Currently unused
     enemy1.travelDir = LEFT;
     enemy1.color = RED;
-    enemy1.tarX = REDX;
-    enemy1.tarY = REDY;
+    enemy1.tarX = scatterX[enemy1.id];
+    enemy1.tarY = scatterY[enemy1.id];
     enemy1.inPlay = TRUE;
     enemy1.dotCount = 0;
     enemy1.dotLimit = 0;
-    enemy1.scatterX = REDX;
-    enemy1.scatterY = REDY;
 
     enemy2.id = 2;
     enemy2.x = 17;
@@ -495,13 +503,11 @@ void setupPlayers(void) {
     enemy2.speed = 10; //Currently unused
     enemy2.travelDir = LEFT;
     enemy2.color = PINK;
-    enemy2.tarX = PINKX;
-    enemy2.tarY = PINKY;
+    enemy2.tarX = scatterX[enemy2.id];
+    enemy2.tarY = scatterY[enemy2.id];
     enemy2.inPlay = FALSE;
     enemy2.dotCount = 0;
     enemy2.dotLimit = 0;
-    enemy2.scatterX = PINKX;
-    enemy2.scatterY = PINKY;
 
     enemy3.id = 3;
     enemy3.x = 17;
@@ -509,13 +515,11 @@ void setupPlayers(void) {
     enemy3.speed = 10; //Currently unused
     enemy3.travelDir = LEFT;
     enemy3.color = CYAN;
-    enemy3.tarX = CYANX;
-    enemy3.tarY = CYANY;
+    enemy3.tarX = scatterX[enemy3.id];
+    enemy3.tarY = scatterY[enemy3.id];
     enemy3.inPlay = FALSE;
     enemy3.dotCount = 0;
     enemy3.dotLimit = 30;
-    enemy3.scatterX = CYANX;
-    enemy3.scatterY = CYANY;
 
     enemy4.id = 4;
     enemy4.x = 14;
@@ -523,13 +527,11 @@ void setupPlayers(void) {
     enemy4.speed = 10; //Currently unused
     enemy4.travelDir = LEFT;
     enemy4.color = ORANGE;
-    enemy4.tarX = ORANGEX;
-    enemy4.tarY = ORANGEY;
+    enemy4.tarX = scatterY[enemy4.id];
+    enemy4.tarY = scatterY[enemy4.id];
     enemy4.inPlay = FALSE;
     enemy4.dotCount = 0;
     enemy4.dotLimit = 60;
-    enemy4.scatterX = ORANGEX;
-    enemy4.scatterY = ORANGEY;
 
     enemyMode = SCATTER;
 }
@@ -551,18 +553,19 @@ void reverseDir(Player *pawn) {
     }
 }
 
+void setScatterTar(Player *pawn) {
+    pawn->tarX = scatterX[pawn->id];
+    pawn->tarY = scatterY[pawn->id];
+}
+
 void changeBehavior(uint8_t mode) {
     switch(mode) {
         case SCATTER:
             //Change Targets
-            enemy1.tarX = REDX;
-            enemy1.tarY = REDY;
-            enemy2.tarX = PINKX;
-            enemy2.tarY = PINKY;
-            enemy3.tarX = CYANX;
-            enemy3.tarY = CYANY;
-            enemy4.tarX = ORANGEX;
-            enemy4.tarY = ORANGEY;
+            setScatterTar(&enemy1);
+            setScatterTar(&enemy2);
+            setScatterTar(&enemy3);
+            setScatterTar(&enemy4);
             enemyMode = SCATTER;
             break;
         case CHASE:
@@ -591,16 +594,16 @@ uint8_t wasEaten(Player *player, Player *pawn) {
 
 void performRetreat(Player *pawn) {
     pawn->color = GREEN;
-    pawn->tarX = RETREATX;
-    pawn->tarY = RETREATY;
+    pawn->tarX = scatterX[0];
+    pawn->tarY = scatterY[0];
 }
 
 void enterHouse(Player *pawn) {
     pawn->color = enemyColor[pawn->id];
-    pawn->x = RETREATX;
-    pawn->y = RETREATY+2;
-    pawn->tarX = pawn->scatterX;
-    pawn->tarY = pawn->scatterY;
+    pawn->x = scatterX[0];
+    pawn->y = scatterY[0]+2;
+    pawn->tarX = scatterX[pawn->id];
+    pawn->tarY = scatterY[pawn->id];
 }
 
 void checkEaten(void) {
