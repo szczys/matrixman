@@ -1,15 +1,12 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
+#include <inttypes.h>
 #include "board.h"
 #include "dots.h"
 #include "player.h"
+#include "display.h"
 
 uint32_t dotTracker[36];
-
-//SDL2 variables
-void* nullptr;
-SDL_Window *win;
-SDL_Renderer *ren;
 
 #define TRUE 1
 #define FALSE 0
@@ -41,34 +38,6 @@ static const uint16_t behaviors[] = {
 #define LEFT    2
 #define RIGHT   3
 
-//Color definitions
-#define BLUE    0
-#define YELLOW  1
-#define RED     2
-#define PINK    3
-#define ORANGE  4
-#define CYAN    5
-#define BLACK   6
-#define GREY    7
-#define WHITE   8
-#define LAVENDAR  9
-#define GREEN   10
-
-//Color values
-static const uint8_t colors[][3] = {
-    { 0, 0, 255 },      //Blue
-    { 255, 255, 0 },    //Yellow
-    { 255, 0, 0 },      //Red
-    { 255, 153, 204 },  //Pink
-    { 255, 102, 0 },    //Orange
-    { 0, 255, 255 },    //Cyan
-    { 0, 0, 0 },        //Black
-    { 64, 64, 64 },     //Grey
-    { 255, 255, 255 },  //White
-    { 196, 64, 255},    //Lavendar
-    { 0, 255, 0}        //Green
-};
-
 //Enemy Data
 const uint8_t playerColor[5] = { YELLOW, RED, PINK, CYAN, ORANGE };
 const uint8_t startingX[5] = { 15, 15, 17, 17, 14 };
@@ -87,39 +56,7 @@ const uint8_t scatterY[5] = { 14, 0, 0, 35, 35 };
 void enterHouse(Player *pawn);
 void changeBehavior(uint8_t mode);
 /*--------------------*/
-void initDisplay(void) {
 
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-        printf("SDL_Init Error: %s\n", SDL_GetError());
-    }
-
-    win = SDL_CreateWindow("Matrixman", 100, 100, 10*32, 10*32, SDL_WINDOW_SHOWN);
-    if (win == nullptr) {
-        printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
-    }
-
-    ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (ren == nullptr) {
-        printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
-    }
-}
-
-void displayClear(uint8_t color) {
-    SDL_SetRenderDrawColor(ren, colors[color][0], colors[color][1], colors[color][2], 255);
-    SDL_RenderClear(ren);
-}
-
-void displayPixel(uint8_t x, uint8_t y, char color) {
-    SDL_Rect rect;
-    //TODO: Eventually these rectangles will just be LED pixels so this number 10 is arbitrary
-    rect.x = x*10;
-    rect.y = (y-2)*10;
-    rect.w = 10;
-    rect.h = 10;
-
-    SDL_SetRenderDrawColor(ren, colors[color][0], colors[color][1], colors[color][2], 255);
-    SDL_RenderFillRect(ren, &rect);
-}
 
 //Function returns 1 if next move is not a collision with the board
 uint8_t canMove(uint8_t nextX, uint8_t nextY) {
@@ -214,7 +151,6 @@ void movePlayer(Player *pawn) {
         pawn->y = testY;
         //redraw player at new spot
         displayPixel(pawn->x, pawn->y, pawn->color);
-        SDL_RenderPresent(ren);
         //gobble the dot
         if ((pawn == &myGuy) && isPixel(pawn->x,pawn->y)) {
             dotTracker[pawn->y] &= ~(1<<(31-pawn->x));  //Remove dot from the board
@@ -601,7 +537,6 @@ int main(int argn, char **argv)
 
     //Draw the player
     displayPixel(myGuy.x, myGuy.y, myGuy.color);
-    SDL_RenderPresent(ren);
     
     SDL_Event event;
     gameRunning = TRUE;
@@ -701,8 +636,7 @@ int main(int argn, char **argv)
 
    }
 
-    SDL_DestroyWindow(win);
-    SDL_Quit();
+    displayClose();
 
     return 0;
 }
