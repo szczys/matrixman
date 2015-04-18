@@ -116,6 +116,7 @@ void movePlayer(Player *pawn) {
         displayPixel(pawn->x, pawn->y, BLACK);
         enterHouse(pawn);
         displayPixel(pawn->x, pawn->y, pawn->color);
+        displayLatch(); //redraws display (if necessary)
         return;
     }
     else {
@@ -161,6 +162,7 @@ void movePlayer(Player *pawn) {
             }
         }
     }
+    displayLatch(); //Redraw display (if necessary);
 }
 
 uint16_t getDistance(uint8_t x, uint8_t y, uint8_t targetX, uint8_t targetY) {
@@ -375,6 +377,7 @@ void checkDots(Player *pawn) {
         pawn->x = 18;
         pawn->y = 14;
         displayPixel(pawn->x, pawn->y, pawn->color); //Draw new locaiton
+        displayLatch(); //Redraw display (if necessary)
         pawn->inPlay = TRUE;
         pawn->travelDir = LEFT; //TODO: shouldn't need to reset direction here
     }
@@ -537,6 +540,7 @@ int main(int argn, char **argv)
 
     //Draw the player
     displayPixel(myGuy.x, myGuy.y, myGuy.color);
+    displayLatch(); //Redraws display (if necessary)
     
     SDL_Event event;
     gameRunning = TRUE;

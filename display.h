@@ -31,4 +31,5 @@ void initDisplay(void);
 void displayClear(uint8_t color);
 void displayPixel(uint8_t x, uint8_t y, char color);
 void displayClose(void);
+void displayLatch(void);
 /*--------------------*/

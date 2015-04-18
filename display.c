@@ -40,10 +40,13 @@ void displayPixel(uint8_t x, uint8_t y, char color) {
 
     SDL_SetRenderDrawColor(ren, colors[color][0], colors[color][1], colors[color][2], 255);
     SDL_RenderFillRect(ren, &rect);
-    SDL_RenderPresent(ren);
 }
 
 void displayClose(void) {
     SDL_DestroyWindow(win);
     SDL_Quit();
+}
+
+void displayLatch(void) {
+    SDL_RenderPresent(ren);
 }
