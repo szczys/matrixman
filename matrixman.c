@@ -414,6 +414,22 @@ void setScatterTar(Player *pawn) {
 }
 
 void changeBehavior(uint8_t mode) {
+    //Enemies should reverse current direction when modes change
+    //Unless coming out of FRIGHT mode
+    if (enemyMode != FRIGHT) {
+        reverseDir(&enemy1);
+        reverseDir(&enemy2);
+        reverseDir(&enemy3);
+        reverseDir(&enemy4);
+    }
+    else {
+        //No longer frightened, revive natural color
+        enemy1.color = playerColor[enemy1.id];
+        enemy2.color = playerColor[enemy2.id];
+        enemy3.color = playerColor[enemy3.id];
+        enemy4.color = playerColor[enemy4.id];
+    }
+    
     switch(mode) {
         case SCATTER:
             //Change Targets
@@ -435,11 +451,6 @@ void changeBehavior(uint8_t mode) {
             enemy4.color = LAVENDAR;
             break;
     }
-    //Enemies should reverse current direction when modes change
-    reverseDir(&enemy1);
-    reverseDir(&enemy2);
-    reverseDir(&enemy3);
-    reverseDir(&enemy4);
 }
 
 uint8_t wasEaten(Player *player, Player *pawn) {
