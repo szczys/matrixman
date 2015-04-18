@@ -513,6 +513,7 @@ int main(int argn, char **argv)
     //set initial values for player and enemies
     setupPlayer(&myGuy,0,0);
     setupPlayer(&enemy1,1,0);
+    enemy1.inPlay = TRUE; //Enemy1 always starts inPlay
     setupPlayer(&enemy2,2,0);
     setupPlayer(&enemy3,3,30);
     setupPlayer(&enemy4,4,60);
@@ -624,6 +625,7 @@ int main(int argn, char **argv)
         }
         
         //Enemy dot counters
+        checkDots(&enemy1);
         checkDots(&enemy2);
         checkDots(&enemy3);
         checkDots(&enemy4);
