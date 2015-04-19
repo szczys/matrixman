@@ -11,4 +11,5 @@ typedef struct PlayerTAG {
     uint8_t dotCount;   /*For player tracks level completion
                           For enemy decides when to go inPlay*/
     uint8_t dotLimit;   //How many dots before this enemy is inPlay
+    uint8_t speedMode;  //Index used to look up player speed
 } Player;

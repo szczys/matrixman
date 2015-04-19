@@ -48,6 +48,13 @@ const uint8_t scatterY[5] = { 14, 0, 0, 35, 35 };
     <index>: Player, Enemy, PlayerFright, EnemyFright, EnemyTunnel */
 const uint8_t speed[] = { 125, 133, 111, 200, 250 };
 
+//Index values for the speed array
+#define SPEEDPLAYER         0
+#define SPEEDENEMY          1
+#define SPEEDPLAYERFRIGHT   2
+#define SPEEDENEMYFRIGHT    3
+#define SPEEDENEMYTUNNEL    4
+
 //PowerPixel rows and columns
 #define PP1COL    3
 #define PP2COL    28
@@ -393,8 +400,8 @@ void setupPlayer(Player *pawn, uint8_t newId, uint8_t newDotLimit) {
     pawn->id = newId;
     pawn->x = startingX[pawn->id];
     pawn->y = startingY[pawn->id];
-    if (newId) { pawn->speed = speed[1]; }
-    else { pawn->speed = speed[0]; }
+    if (newId) { changeSpeed(pawn, SPEEDENEMY); }
+    else { changeSpeed(pawn, SPEEDPLAYER); }
     pawn->travelDir = LEFT;
     pawn->color = playerColor[pawn->id];
     pawn->tarX = scatterX[pawn->id];
@@ -425,6 +432,10 @@ void setScatterTar(Player *pawn) {
     pawn->tarY = scatterY[pawn->id];
 }
 
+void changeSpeed(Player *pawn, uint8_t index) {
+    //multiplying by 5 offsets single-level array for diff levels
+    pawn->speed = speed[(level * 5) + index]; 
+}
 void changeBehavior(uint8_t mode) {
     //Enemies should reverse current direction when modes change
     //Unless coming out of FRIGHT mode
@@ -444,6 +455,11 @@ void changeBehavior(uint8_t mode) {
 
     switch(mode) {
         case SCATTER:
+            //Change Speed
+            enemy1.speedMode = SPEEDENEMY;
+            enemy2.speedMode = SPEEDENEMY;
+            enemy3.speedMode = SPEEDENEMY;
+            enemy4.speedMode = SPEEDENEMY;
             //Change Targets
             setScatterTar(&enemy1);
             setScatterTar(&enemy2);
@@ -452,6 +468,11 @@ void changeBehavior(uint8_t mode) {
             enemyMode = SCATTER;
             break;
         case CHASE:
+            //Change Speed
+            enemy1.speedMode = SPEEDENEMY;
+            enemy2.speedMode = SPEEDENEMY;
+            enemy3.speedMode = SPEEDENEMY;
+            enemy4.speedMode = SPEEDENEMY;
             enemyMode = CHASE;
             break;
         case FRIGHT:
@@ -459,6 +480,11 @@ void changeBehavior(uint8_t mode) {
             frightTimer = 6000;
             if (enemyMode != FRIGHT) { lastBehavior = enemyMode; }
             enemyMode = FRIGHT;
+            //Change speeds
+            enemy1.speedMode = SPEEDENEMYFRIGHT;
+            enemy2.speedMode = SPEEDENEMYFRIGHT;
+            enemy3.speedMode = SPEEDENEMYFRIGHT;
+            enemy4.speedMode = SPEEDENEMYFRIGHT;
             //Fix colors
             enemy1.color = LAVENDAR;
             enemy2.color = LAVENDAR;
@@ -538,7 +564,7 @@ void enemyTick(Player *pawn) {
         routeChoice(pawn);
         movePlayer(pawn);
         checkEaten();
-        pawn->speed = speed[1];
+        changeSpeed(pawn, pawn->speedMode);
     }
 }
 
@@ -692,36 +718,6 @@ int main(int argn, char **argv)
             checkEaten();
             myGuy.speed = speed[0];
         }
-        /*
-        //Move the players
-        if (ticks++ > 125) {
-            setTarget(enemy1.id);
-            setTarget(enemy2.id);
-            setTarget(enemy3.id);
-            setTarget(enemy4.id);
-
-             //This is for enemy movement
-            routeChoice(&enemy1);
-            routeChoice(&enemy2);
-            routeChoice(&enemy3);
-            routeChoice(&enemy4);
-
-            movePlayer(&enemy1);
-            movePlayer(&enemy2);
-            movePlayer(&enemy3);
-            movePlayer(&enemy4);
-
-            checkEaten();   //Did an enemy enter the player's square?
-
-            playerRoute(&myGuy, nextDir);        //see if player wanted direction change
-            movePlayer(&myGuy); //move player
-
-            checkEaten();   //Did the player enter an enemy's square?
-
-            //TODO: Reset counter (this should be interrupts when in hardware
-            ticks = 0;
-        }
-        */
 
         //Enemy dot counters
         checkDots(&enemy1, FALSE);
