@@ -308,59 +308,68 @@ void routeChoice(Player *pawn) {
     }
 }
 
-void setTargets(Player *player, Player *pawn1, Player *pawn2, Player *pawn3, Player *pawn4) {
+void setTarget(uint8_t index) {
     if (enemyMode != CHASE) { return; }
-
-    /*--------------- Enemy1 ------------------*/
-    pawn1->tarX = player->x;
-    pawn1->tarY = player->y;
-
-    /*--------------- Enemy2 ------------------*/
-    switch (player->travelDir) {
-        case UP:
-            if (player->y < 4) { pawn2->tarY = 0; }
-            else { pawn2->tarY = player->y - 4; }
-            //Account for original game overflow bug
-            if (player->x < 4) { pawn2->tarX = 0; }
-            else { pawn2->tarX = player->x - 4; }
-            break;
-        case DOWN:
-            if (player->y > 31) { pawn2->tarY = 35; }
-            else { pawn2->tarY = player->y + 4; }
-            break;
-        case LEFT:
-            if (player->x < 4) { pawn2->tarX = 0; }
-            else { pawn2->tarX = player->x - 4; }
-            break;
-        case RIGHT:
-            if (player->x > 27) { pawn2->tarX = 31; }
-            else { pawn2->tarX = player->x + 4; }
-            break;
-    }
-
-    /*--------------- Enemy3 ------------------*/
     int8_t tempNum;
+    switch (index) {
+        case 1:
+            /*--------------- Enemy1 ------------------*/
+            enemy1.tarX = myGuy.x;
+            enemy1.tarY = myGuy.y;
+            break;
 
-    //setX
-    tempNum = player->x - (pawn1->x - player->x);
-    if (tempNum < 0) { tempNum = 0; }    
-    if (tempNum > 31) { tempNum = 31; }
-    pawn3->tarX = (uint8_t)tempNum;
+        case 2:
+            /*--------------- Enemy2 ------------------*/
+            switch (myGuy.travelDir) {
+                case UP:
+                    if (myGuy.y < 4) { enemy2.tarY = 0; }
+                    else { enemy2.tarY = myGuy.y - 4; }
+                    //Account for original game overflow bug
+                    if (myGuy.x < 4) { enemy2.tarX = 0; }
+                    else { enemy2.tarX = myGuy.x - 4; }
+                    break;
+                case DOWN:
+                    if (myGuy.y > 31) { enemy2.tarY = 35; }
+                    else { enemy2.tarY = myGuy.y + 4; }
+                    break;
+                case LEFT:
+                    if (myGuy.x < 4) { enemy2.tarX = 0; }
+                    else { myGuy.tarX = enemy2.x - 4; }
+                    break;
+                case RIGHT:
+                    if (myGuy.x > 27) { enemy2.tarX = 31; }
+                    else { enemy2.tarX = myGuy.x + 4; }
+                    break;
+            }
+            break;
 
-    //setY
-    tempNum = player->y - (pawn1->y - player->y);
-    if (tempNum < 0) { tempNum = 0; }    
-    if (tempNum > 35) { tempNum = 35; }
-    pawn3->tarY = (uint8_t)tempNum;
+        case 3:
+            /*--------------- Enemy3 ------------------*/
 
-    /*--------------- Enemy4 ------------------*/
-    if (getDistance(pawn4->x, pawn4->y, player->x, player->y) > 64) {
-        pawn4->tarX = player->x;
-        pawn4->tarY = player->y;
-    }
-    else {
-        pawn4->tarX = scatterX[pawn4->id];
-        pawn4->tarY = scatterY[pawn4->id];
+            //setX
+            tempNum = myGuy.x - (enemy1.x - myGuy.x);
+            if (tempNum < 0) { tempNum = 0; }
+            if (tempNum > 31) { tempNum = 31; }
+            enemy3.tarX = (uint8_t)tempNum;
+
+            //setY
+            tempNum = myGuy.y - (enemy1.y - myGuy.y);
+            if (tempNum < 0) { tempNum = 0; }
+            if (tempNum > 35) { tempNum = 35; }
+            enemy3.tarY = (uint8_t)tempNum;
+            break;
+
+        case 4:
+            /*--------------- Enemy4 ------------------*/
+            if (getDistance(enemy4.x, enemy4.y, myGuy.x, myGuy.y) > 64) {
+                enemy4.tarX = myGuy.x;
+                enemy4.tarY = myGuy.y;
+            }
+            else {
+                enemy4.tarX = scatterX[enemy4.id];
+                enemy4.tarY = scatterY[enemy4.id];
+            }
+            break;
     }
 }
 
@@ -521,8 +530,14 @@ void expiredDotTimer(void) {
 int main(int argn, char **argv)
 {
     //TODO: Level change: Update dot counters by level
-    //TODO: Level change: Player and enemy speed changes
-    //TODO: Speed change for enemies in tunnel
+    /*TODO: Level change: Player and enemy speed changes
+        100% = 10/second = 100ms ticks
+        17ms speed penalty per dot gobbled
+        50ms speed penalty for power pellet
+        Level1: player 80%, 90% fright
+        Level1: enemy 75%, 50% fright
+    */
+    //TODO: Speed change for enemies in tunnel (lvl1 40%)
     //TODO: PowerPixel blink
     //TODO: Implement extra lives
     //TODO: Implement global dot counter (when life lost; 7/17/32 dots)
@@ -643,9 +658,20 @@ int main(int argn, char **argv)
             }
         }
 
+        //decrement counter and check for trigger
+        //set target or take user input
+        //choose route
+        //movePiece
+        //checkEaten
+
+
         //Move the players
-        if (ticks++ > 150) {
-            setTargets(&myGuy, &enemy1, &enemy2, &enemy3, &enemy4);
+        if (ticks++ > 125) {
+            setTarget(enemy1.id);
+            setTarget(enemy2.id);
+            setTarget(enemy3.id);
+            setTarget(enemy4.id);
+
             routeChoice(&enemy1); //This is for enemy movement
             routeChoice(&enemy2);
             routeChoice(&enemy3);
