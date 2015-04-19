@@ -67,26 +67,21 @@ uint8_t canMove(uint8_t nextX, uint8_t nextY) {
 void gobbleCount(void) {
     myGuy.dotCount += 1;
     dotTimer = 0;   //Reset timer
-    printf("myGuy.dotCount: %d\n",myGuy.dotCount);
 
     if (enemy1.inPlay == FALSE) {
         enemy1.dotCount += 1;
-        printf("enemy1.dotCount: %d\n", enemy1.dotCount);
         return;
     }
     if (enemy2.inPlay == FALSE) {
         enemy2.dotCount += 1;
-        printf("enemy2.dotCount: %d\n", enemy2.dotCount);
         return;
     }
     if (enemy3.inPlay == FALSE) {
         enemy3.dotCount += 1;
-        printf("enemy3.dotCount: %d\n", enemy3.dotCount);
         return;
     }
     if (enemy4.inPlay == FALSE) {
         enemy4.dotCount += 1;
-        printf("enemy4.dotCount: %d\n", enemy4.dotCount);
         return;
     }
 }
@@ -110,7 +105,6 @@ void movePlayer(Player *pawn) {
     uint8_t testY = pawn->y;
 
     if ((pawn->color == GREEN) && (pawn->x == scatterX[0]) && (pawn->y == scatterY[0])) {
-        printf("Back Home\n");
         //Gobbled enemy has made it home, put it in the house
         displayPixel(pawn->x, pawn->y, BLACK);
         enterHouse(pawn);
@@ -210,7 +204,7 @@ void routeChoice(Player *pawn) {
     //Test for four intersections where turning upward is forbidden
     if (((testX == 14) || (testX == 17)) 
         && ((testY == 14) || (testY == 26))
-        && pawn->travelDir != DOWN) { printf("no turning up\n"); return; }
+        && pawn->travelDir != DOWN) { return; }
 
     //Set 3 distances then choose the shortest
     uint16_t route1, route2, route3;
@@ -537,8 +531,7 @@ int main(int argn, char **argv)
         1) It should emerge as a danger to player (can be re-eaten)
         2) Does it go back into SCATTER/CHASE mode?
     */
-
-    printf("Hello world!\n");
+    //TODO: Incremental score for eating enemies
 
     //set initial values for player and enemies
     setupPlayer(&myGuy,0,0);
