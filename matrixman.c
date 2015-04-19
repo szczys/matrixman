@@ -66,8 +66,9 @@ uint8_t canMove(uint8_t nextX, uint8_t nextY) {
 
 void gobbleCount(void) {
     myGuy.dotCount += 1;
+    dotTimer = 0;   //Reset timer
     printf("myGuy.dotCount: %d\n",myGuy.dotCount);
-    
+
     if (enemy1.inPlay == FALSE) {
         enemy1.dotCount += 1;
         printf("enemy1.dotCount: %d\n", enemy1.dotCount);
@@ -369,8 +370,8 @@ void setTargets(Player *player, Player *pawn1, Player *pawn2, Player *pawn3, Pla
     }
 }
 
-void checkDots(Player *pawn) {
-    if ((pawn->inPlay == FALSE) && (pawn->dotCount >= pawn->dotLimit)) {
+void checkDots(Player *pawn, uint8_t force) {
+    if ((force == TRUE) || ((pawn->inPlay == FALSE) && (pawn->dotCount >= pawn->dotLimit))) {
         displayPixel(pawn->x, pawn->y, BLACK); //erase current locaiton
         pawn->x = 18;
         pawn->y = 14;
@@ -501,7 +502,6 @@ void checkEaten(void) {
         if (wasEaten(&myGuy, &enemy2)) { performRetreat(&enemy2); }
         if (wasEaten(&myGuy, &enemy3)) { performRetreat(&enemy3); }
         if (wasEaten(&myGuy, &enemy4)) { performRetreat(&enemy4); }
-        
     }
 }
 
@@ -513,13 +513,23 @@ void flashEnemy(Player *pawn, uint8_t color) {
     }
 }
 
+void expiredDotTimer(void) {
+    //Too long since a dot was eaten, release an enemy if you canMove
+    dotTimer = 0;   //Reset timer
+    printf("dotTimer expired.\n");
+
+    if (enemy1.inPlay == FALSE) { checkDots(&enemy1, TRUE); return; }
+    if (enemy2.inPlay == FALSE) { checkDots(&enemy2, TRUE); return; }
+    if (enemy3.inPlay == FALSE) { checkDots(&enemy3, TRUE); return; }
+    if (enemy4.inPlay == FALSE) { checkDots(&enemy4, TRUE); return; }
+}
+
 int main(int argn, char **argv)
 {
     //TODO: Level change: Update dot counters by level
     //TODO: Level change: Player and enemy speed changes
     //TODO: Speed change for enemies in tunnel
     //TODO: PowerPixel blink
-    //TODO: Implement timed enemy release: 4 seconds; 3 seconds lvl5+
     //TODO: Implement extra lives
     //TODO: Implement global dot counter (when life lost; 7/17/32 dots)
     //TODO: bonus food
@@ -562,9 +572,9 @@ int main(int argn, char **argv)
             if (dots[i] & (1<<(31-j))) {    //Invert the x (big endian)
                 displayPixel(j, i, GREY); 
             }
-        }        
+        }
     }
-    
+
     //Draw PowerPixels
     displayPixel(PP1COL, PP1ROW, WHITE);
     displayPixel(PP1COL, PP2ROW, WHITE);
@@ -574,7 +584,7 @@ int main(int argn, char **argv)
     //Draw the player
     displayPixel(myGuy.x, myGuy.y, myGuy.color);
     displayLatch(); //Redraws display (if necessary)
-    
+
     gameRunning = TRUE;
     uint16_t ticks = 0;
     uint16_t behaviorTicks = 0;
@@ -665,10 +675,15 @@ int main(int argn, char **argv)
         }
 
         //Enemy dot counters
-        checkDots(&enemy1);
-        checkDots(&enemy2);
-        checkDots(&enemy3);
-        checkDots(&enemy4);
+        checkDots(&enemy1, FALSE);
+        checkDots(&enemy2, FALSE);
+        checkDots(&enemy3, FALSE);
+        checkDots(&enemy4, FALSE);
+
+        if (dotTimer++ >= 4000) {
+            //TODO: this time limit should change at lvl5+
+            expiredDotTimer();
+        }
 
         controlDelayMs(1);
         /* End of game animation */
