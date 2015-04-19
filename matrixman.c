@@ -436,12 +436,12 @@ void changeBehavior(uint8_t mode) {
     }
     else {
         //No longer frightened, revive natural color
-        enemy1.color = playerColor[enemy1.id];
-        enemy2.color = playerColor[enemy2.id];
-        enemy3.color = playerColor[enemy3.id];
-        enemy4.color = playerColor[enemy4.id];
+        if (enemy1.color != GREEN) { enemy1.color = playerColor[enemy1.id]; }
+        if (enemy2.color != GREEN) { enemy2.color = playerColor[enemy2.id]; }
+        if (enemy3.color != GREEN) { enemy3.color = playerColor[enemy3.id]; }
+        if (enemy4.color != GREEN) { enemy4.color = playerColor[enemy4.id]; }
     }
-    
+
     switch(mode) {
         case SCATTER:
             //Change Targets
@@ -457,7 +457,7 @@ void changeBehavior(uint8_t mode) {
         case FRIGHT:
             //TODO: Fright timer should change as levels increase
             frightTimer = 6000;
-            lastBehavior = enemyMode;
+            if (enemyMode != FRIGHT) { lastBehavior = enemyMode; }
             enemyMode = FRIGHT;
             //Fix colors
             enemy1.color = LAVENDAR;
