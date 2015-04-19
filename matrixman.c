@@ -513,6 +513,12 @@ int main(int argn, char **argv)
 {
     //TODO: Level change: Update dot counters by level
     //TODO: Level change: Player and enemy speed changes
+    //TODO: Speed change for enemies in tunnel
+    //TODO: PowerPixel blink
+    //TODO: Implement timed enemy release: 4 seconds; 3 seconds lvl5+
+    //TODO: Implement extra lives
+    //TODO: Implement global dot counter (when life lost; 7/17/32 dots)
+    //TODO: bonus food
 
     printf("Hello world!\n");
     
@@ -592,6 +598,7 @@ int main(int argn, char **argv)
         //Switch Modes
         if (enemyMode == FRIGHT) {
             --frightTimer;
+            /*-- This Block Flashes the enemies coming out of FRIGHT mode --*/
             if (frightTimer <= 1800) {
                 if (frightTimer%200 == 0) {
                     uint8_t flashColor;
@@ -602,15 +609,18 @@ int main(int argn, char **argv)
                     else {
                         //1600 1200 800 4000 0
                         flashColor = LAVENDAR;
-                    } // 200-0, 600-400, 1000-800, 1400-1200 1800-1600  WHITE:2,6,10,14,18 (1,3,5,7,9
+                    }
                     flashEnemy(&enemy1, flashColor);
                     flashEnemy(&enemy2, flashColor);
                     flashEnemy(&enemy3, flashColor);
                     flashEnemy(&enemy4, flashColor);
                 }
             }
+            //Leave fright mode when timer expires
             if (frightTimer == 0) { changeBehavior(lastBehavior); }
         }
+        //Switch between SCATTER and CHASE depending on level paramaters
+        //This is an else statement so that the timer doesn't run during FRIGHT mode
         else if (behaviorTicks++ > behaviors[behaviorIndex]) {
             if (behaviors[behaviorIndex] > 0) {
                 //Checking for 0 lets us run final behavior forever
