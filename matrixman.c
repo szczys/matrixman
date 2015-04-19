@@ -19,10 +19,11 @@ Player enemy2;
 Player enemy3;
 Player enemy4;
 
-uint8_t enemyMode;
-uint8_t gameRunning;
-uint16_t frightTimer;
-uint8_t lastBehavior;
+uint8_t enemyMode;      //SCATTER, CHASE, or FRIGHT
+uint8_t gameRunning;    //TRUE unles game over: FALSE
+uint16_t frightTimer;   //Counts down to end of FRIGHT mode
+uint8_t lastBehavior;   //Saves mode before entering FRIGHT
+uint16_t dotTimer;      //Countdown release enemies if dots not eaten
 
 //enemyMode types
 #define SCATTER 0
@@ -519,7 +520,11 @@ int main(int argn, char **argv)
     //TODO: Implement extra lives
     //TODO: Implement global dot counter (when life lost; 7/17/32 dots)
     //TODO: bonus food
-
+    /*TODO: When enemy in fright mode is eaten and makes it back to house:
+        1) It should emerge as a danger to player (can be re-eaten)
+        2) Does it go back into SCATTER/CHASE mode?
+    */
+    
     printf("Hello world!\n");
     
     //set initial values for player and enemies
@@ -571,8 +576,8 @@ int main(int argn, char **argv)
     uint16_t ticks = 0;
     uint16_t behaviorTicks = 0;
     uint8_t behaviorIndex = 0;
-
     uint8_t nextDir = RIGHT;
+    dotTimer = 0;
 
     while (gameRunning)
     {
