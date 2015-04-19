@@ -220,7 +220,7 @@ void routeChoice(Player *pawn) {
     
     /*TODO: Fix this dirty hack 
         This whole block is ineloquent
-        Check for "GREEN" color is workaround for retreating in FRIGHT mode         
+        Check for "GREEN" color is workaround for retreating in FRIGHT mode
     */
     if ((enemyMode == FRIGHT) && (pawn->color != GREEN)) {
         //Enemies choose route randomly in this mode
@@ -352,7 +352,7 @@ void setTargets(Player *player, Player *pawn1, Player *pawn2, Player *pawn3, Pla
     if (tempNum > 31) { tempNum = 31; }
     pawn3->tarX = (uint8_t)tempNum;
 
-    //setY    
+    //setY
     tempNum = player->y - (pawn1->y - player->y);
     if (tempNum < 0) { tempNum = 0; }    
     if (tempNum > 35) { tempNum = 35; }
@@ -465,12 +465,16 @@ uint8_t wasEaten(Player *player, Player *pawn) {
 }
 
 void performRetreat(Player *pawn) {
+    /*TODO: Each player should have enemyMode setting
+        and it should be checked here */
     pawn->color = GREEN;
     pawn->tarX = scatterX[0];
     pawn->tarY = scatterY[0];
 }
 
 void enterHouse(Player *pawn) {
+    /*TODO: Each player should have enemyMode setting
+        and it should be changed here */
     pawn->color = playerColor[pawn->id];
     pawn->x = scatterX[0];
     pawn->y = scatterY[0]+2;
@@ -508,7 +512,6 @@ void flashEnemy(Player *pawn, uint8_t color) {
         displayLatch(); //redraws display (if necessary)
     }
 }
-    
 
 int main(int argn, char **argv)
 {
@@ -524,9 +527,9 @@ int main(int argn, char **argv)
         1) It should emerge as a danger to player (can be re-eaten)
         2) Does it go back into SCATTER/CHASE mode?
     */
-    
+
     printf("Hello world!\n");
-    
+
     //set initial values for player and enemies
     setupPlayer(&myGuy,0,0);
     setupPlayer(&enemy1,1,0);
@@ -535,18 +538,18 @@ int main(int argn, char **argv)
     setupPlayer(&enemy3,3,30);
     setupPlayer(&enemy4,4,60);
     enemyMode = SCATTER;
-    
+
     initDisplay();
-    
+
     //Draw the board
     for (uint16_t i = 2; i < 34; i++) {
         for (uint16_t j = 0; j<32; j++) {
             if (board[i] & (1<<(31-j))) {    //Invert the x (big endian)
                 displayPixel(j, i, BLUE); 
             }
-        }        
+        }
     }
-    
+
     //Get Dot-tracking array ready
     for (uint8_t i=0; i<36; i++) {
         dotTracker[i] = 0x00000000;
@@ -581,9 +584,9 @@ int main(int argn, char **argv)
 
     while (gameRunning)
     {
-        
+
         //TODO: This is all input code which need to change when ported
-        
+
         /*---- User Input ----*/
         uint8_t control = getControl();
         switch (control) {
@@ -631,13 +634,13 @@ int main(int argn, char **argv)
                 //Checking for 0 lets us run final behavior forever
                 behaviorIndex++;
                 behaviorTicks = 0;
-                
+
                 if (behaviorIndex % 2) { changeBehavior(CHASE); }
                 else { changeBehavior(SCATTER); }
             }
         }
 
-        //Move the players        
+        //Move the players
         if (ticks++ > 150) {
             setTargets(&myGuy, &enemy1, &enemy2, &enemy3, &enemy4);
             routeChoice(&enemy1); //This is for enemy movement
@@ -651,26 +654,24 @@ int main(int argn, char **argv)
             movePlayer(&enemy4);
 
             checkEaten();   //Did an enemy enter the player's square?
-            
+
             playerRoute(&myGuy, nextDir);        //see if player wanted direction change
             movePlayer(&myGuy); //move player
-            
+
             checkEaten();   //Did the player enter an enemy's square?
 
             //TODO: Reset counter (this should be interrupts when in hardware
             ticks = 0;
         }
-        
+
         //Enemy dot counters
         checkDots(&enemy1);
         checkDots(&enemy2);
         checkDots(&enemy3);
         checkDots(&enemy4);
-        
+
         controlDelayMs(1);
         /* End of game animation */
-
-
    }
 
     displayClose();
