@@ -25,6 +25,7 @@ uint16_t frightTimer;   //Counts down to end of FRIGHT mode
 uint8_t lastBehavior;   //Saves mode before entering FRIGHT
 uint16_t dotTimer;      //Countdown release enemies if dots not eaten
 uint16_t level;         //Which level is currently running (zero index)
+uint8_t nextDir;        //Stores the newest direction input from user 
 
 //enemyMode types
 #define SCATTER 0
@@ -64,6 +65,7 @@ const uint8_t speed[] = { 125, 133, 111, 200, 250 };
 /*---- Prototypes ----*/
 void enterHouse(Player *pawn);
 void changeBehavior(uint8_t mode);
+void changeSpeed(Player *pawn, uint8_t index);
 /*--------------------*/
 
 
@@ -159,6 +161,7 @@ void movePlayer(Player *pawn) {
         //gobble the dot
         if ((pawn == &myGuy) && isPixel(pawn->x,pawn->y)) {
             dotTracker[pawn->y] &= ~(1<<(31-pawn->x));  //Remove dot from the board
+            //TODO: add dot time penalty here
             gobbleCount();  //Increment dotCounts
             if (isPowerPixel(pawn->x, pawn->y)) {
                 //Switch to Fright mode
@@ -434,8 +437,9 @@ void setScatterTar(Player *pawn) {
 
 void changeSpeed(Player *pawn, uint8_t index) {
     //multiplying by 5 offsets single-level array for diff levels
-    pawn->speed = speed[(level * 5) + index]; 
+    pawn->speed = speed[(level * 5) + index];
 }
+
 void changeBehavior(uint8_t mode) {
     //Enemies should reverse current direction when modes change
     //Unless coming out of FRIGHT mode
@@ -456,6 +460,7 @@ void changeBehavior(uint8_t mode) {
     switch(mode) {
         case SCATTER:
             //Change Speed
+            myGuy.speedMode = SPEEDPLAYER;
             enemy1.speedMode = SPEEDENEMY;
             enemy2.speedMode = SPEEDENEMY;
             enemy3.speedMode = SPEEDENEMY;
@@ -469,6 +474,7 @@ void changeBehavior(uint8_t mode) {
             break;
         case CHASE:
             //Change Speed
+            myGuy.speedMode = SPEEDPLAYER;
             enemy1.speedMode = SPEEDENEMY;
             enemy2.speedMode = SPEEDENEMY;
             enemy3.speedMode = SPEEDENEMY;
@@ -481,6 +487,7 @@ void changeBehavior(uint8_t mode) {
             if (enemyMode != FRIGHT) { lastBehavior = enemyMode; }
             enemyMode = FRIGHT;
             //Change speeds
+            myGuy.speedMode = SPEEDPLAYERFRIGHT;
             enemy1.speedMode = SPEEDENEMYFRIGHT;
             enemy2.speedMode = SPEEDENEMYFRIGHT;
             enemy3.speedMode = SPEEDENEMYFRIGHT;
@@ -568,6 +575,18 @@ void enemyTick(Player *pawn) {
     }
 }
 
+void playerTick(Player * pawn) {
+    if (--pawn->speed == 0) {
+        playerRoute(&myGuy, nextDir);
+        /*NOTE: changeSpeed must be called before
+            movePlayer because the dot eaten timer
+            penalty is added to the speed counter */
+        changeSpeed(pawn, pawn->speedMode);
+        movePlayer(&myGuy);
+        checkEaten();
+    }
+}
+
 int main(int argn, char **argv)
 {
     //TODO: Level change: Update dot counters by level
@@ -640,7 +659,7 @@ int main(int argn, char **argv)
     uint16_t ticks = 0;
     uint16_t behaviorTicks = 0;
     uint8_t behaviorIndex = 0;
-    uint8_t nextDir = RIGHT;
+    nextDir = RIGHT;
     dotTimer = 0;
 
     while (gameRunning)
@@ -712,12 +731,7 @@ int main(int argn, char **argv)
         enemyTick(&enemy3);
         enemyTick(&enemy4);
 
-        if (--myGuy.speed == 0) {
-            playerRoute(&myGuy, nextDir);
-            movePlayer(&myGuy);
-            checkEaten();
-            myGuy.speed = speed[0];
-        }
+        playerTick(&myGuy);
 
         //Enemy dot counters
         checkDots(&enemy1, FALSE);
