@@ -292,7 +292,7 @@ void routeChoice(Player *pawn) {
             if (canMove(testX, testY+1)) { route2 = getDistance(testX, testY+1, pawn->tarX, pawn->tarY); }
             if (canMove(testX-1, testY)) { route3 = getDistance(testX-1, testY, pawn->tarX, pawn->tarY); }
             if ((route1 < route2) && (route1 < route3)) {
-                pawn->travelDir = UP;   //TODO: apparently moving up is forbidden in original AI logic
+                pawn->travelDir = UP;
             }
             else if ((route2 < route1) && (route2 < route3)) {
                 pawn->travelDir = DOWN;
@@ -303,7 +303,7 @@ void routeChoice(Player *pawn) {
             if (canMove(testX, testY+1)) { route2 = getDistance(testX, testY+1, pawn->tarX, pawn->tarY); }
             if (canMove(testX+1, testY)) { route3 = getDistance(testX+1, testY, pawn->tarX, pawn->tarY); }
             if ((route1 < route2) && (route1 < route3)) {
-                pawn->travelDir = UP;   //TODO: apparently moving up is forbidden in original AI logic
+                pawn->travelDir = UP;
             }
             else if ((route2 < route1) && (route2 < route3)) {
                 pawn->travelDir = DOWN;
@@ -490,7 +490,6 @@ void checkEaten(void) {
             gameRunning = FALSE;
         }
     }
-    //TODO: Else statement here for fright mode ghost gobbled
     else {
         //Enemies should change color and go home when eaten
         if (wasEaten(&myGuy, &enemy1)) { performRetreat(&enemy1); }
@@ -501,12 +500,19 @@ void checkEaten(void) {
     }
 }
 
+void flashEnemy(Player *pawn, uint8_t color) {
+    if ((pawn->color == WHITE) || (pawn->color == LAVENDAR)) {
+        pawn->color = color;
+        displayPixel(pawn->x, pawn->y, pawn->color);
+        displayLatch(); //redraws display (if necessary)
+    }
+}
+    
+
 int main(int argn, char **argv)
 {
     //TODO: Level change: Update dot counters by level
     //TODO: Level change: Player and enemy speed changes
-    //TODO: power pellets and edible ghosts
-
 
     printf("Hello world!\n");
     
@@ -585,15 +591,31 @@ int main(int argn, char **argv)
 
         //Switch Modes
         if (enemyMode == FRIGHT) {
-            if (frightTimer-- <= 1) { changeBehavior(lastBehavior); }
+            --frightTimer;
+            if (frightTimer <= 1800) {
+                if (frightTimer%200 == 0) {
+                    uint8_t flashColor;
+                    if ((frightTimer/200)%2) {
+                        //1800 1400 1000 600 200
+                        flashColor = WHITE;
+                    }
+                    else {
+                        //1600 1200 800 4000 0
+                        flashColor = LAVENDAR;
+                    } // 200-0, 600-400, 1000-800, 1400-1200 1800-1600  WHITE:2,6,10,14,18 (1,3,5,7,9
+                    flashEnemy(&enemy1, flashColor);
+                    flashEnemy(&enemy2, flashColor);
+                    flashEnemy(&enemy3, flashColor);
+                    flashEnemy(&enemy4, flashColor);
+                }
+            }
+            if (frightTimer == 0) { changeBehavior(lastBehavior); }
         }
         else if (behaviorTicks++ > behaviors[behaviorIndex]) {
             if (behaviors[behaviorIndex] > 0) {
                 //Checking for 0 lets us run final behavior forever
                 behaviorIndex++;
                 behaviorTicks = 0;
-                
-                //TODO: This should change if PowerPixel mode time is still going
                 
                 if (behaviorIndex % 2) { changeBehavior(CHASE); }
                 else { changeBehavior(SCATTER); }
