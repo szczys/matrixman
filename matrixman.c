@@ -24,6 +24,7 @@ uint8_t gameRunning;    //TRUE unles game over: FALSE
 uint16_t frightTimer;   //Counts down to end of FRIGHT mode
 uint8_t lastBehavior;   //Saves mode before entering FRIGHT
 uint16_t dotTimer;      //Countdown release enemies if dots not eaten
+uint16_t level;         //Which level is currently running (zero index)
 
 //enemyMode types
 #define SCATTER 0
@@ -43,6 +44,9 @@ const uint8_t startingY[5] = { 26, 14, 16, 17, 17 };
     //Player doesn't have scatter so 0 index is retreat coordinates
 const uint8_t scatterX[5] = { 15, 27, 4, 2, 29 };
 const uint8_t scatterY[5] = { 14, 0, 0, 35, 35 };
+/* Speed is indexed as follows: [(level * 5) + <index>]
+    <index>: Player, Enemy, PlayerFright, EnemyFright, EnemyTunnel */
+const uint8_t speed[] = { 125, 133, 111, 200, 250 };
 
 //PowerPixel rows and columns
 #define PP1COL    3
@@ -389,7 +393,8 @@ void setupPlayer(Player *pawn, uint8_t newId, uint8_t newDotLimit) {
     pawn->id = newId;
     pawn->x = startingX[pawn->id];
     pawn->y = startingY[pawn->id];
-    pawn->speed = 10; //Currently unused
+    if (newId) { pawn->speed = speed[1]; }
+    else { pawn->speed = speed[0]; }
     pawn->travelDir = LEFT;
     pawn->color = playerColor[pawn->id];
     pawn->tarX = scatterX[pawn->id];
@@ -527,6 +532,16 @@ void expiredDotTimer(void) {
     if (enemy4.inPlay == FALSE) { checkDots(&enemy4, TRUE); return; }
 }
 
+void enemyTick(Player *pawn) {
+    if (--pawn->speed == 0) {
+        setTarget(pawn->id);
+        routeChoice(pawn);
+        movePlayer(pawn);
+        checkEaten();
+        pawn->speed = speed[1];
+    }
+}
+
 int main(int argn, char **argv)
 {
     //TODO: Level change: Update dot counters by level
@@ -534,8 +549,8 @@ int main(int argn, char **argv)
         100% = 10/second = 100ms ticks
         17ms speed penalty per dot gobbled
         50ms speed penalty for power pellet
-        Level1: player 80%, 90% fright
-        Level1: enemy 75%, 50% fright
+        Level1: player  80%, 90% (fright)   125ms, 111ms
+        Level1: enemy   75%, 50% (fright)   133ms, 200ms
     */
     //TODO: Speed change for enemies in tunnel (lvl1 40%)
     //TODO: PowerPixel blink
@@ -547,7 +562,9 @@ int main(int argn, char **argv)
         2) Does it go back into SCATTER/CHASE mode?
     */
     //TODO: Incremental score for eating enemies
+    //TODO: BUG: Second PowerPixel sets lastBehavior as FRIGHT == Infinite FRIGHT
 
+    level = 0;
     //set initial values for player and enemies
     setupPlayer(&myGuy,0,0);
     setupPlayer(&enemy1,1,0);
@@ -664,7 +681,18 @@ int main(int argn, char **argv)
         //movePiece
         //checkEaten
 
+        enemyTick(&enemy1);
+        enemyTick(&enemy2);
+        enemyTick(&enemy3);
+        enemyTick(&enemy4);
 
+        if (--myGuy.speed == 0) {
+            playerRoute(&myGuy, nextDir);
+            movePlayer(&myGuy);
+            checkEaten();
+            myGuy.speed = speed[0];
+        }
+        /*
         //Move the players
         if (ticks++ > 125) {
             setTarget(enemy1.id);
@@ -672,7 +700,8 @@ int main(int argn, char **argv)
             setTarget(enemy3.id);
             setTarget(enemy4.id);
 
-            routeChoice(&enemy1); //This is for enemy movement
+             //This is for enemy movement
+            routeChoice(&enemy1);
             routeChoice(&enemy2);
             routeChoice(&enemy3);
             routeChoice(&enemy4);
@@ -692,6 +721,7 @@ int main(int argn, char **argv)
             //TODO: Reset counter (this should be interrupts when in hardware
             ticks = 0;
         }
+        */
 
         //Enemy dot counters
         checkDots(&enemy1, FALSE);
