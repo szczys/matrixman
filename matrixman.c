@@ -47,7 +47,7 @@ const uint8_t scatterX[5] = { 15, 27, 4, 2, 29 };
 const uint8_t scatterY[5] = { 14, 0, 0, 35, 35 };
 /* Speed is indexed as follows: [(level * 5) + <index>]
     <index>: Player, Enemy, PlayerFright, EnemyFright, EnemyTunnel */
-const uint8_t speed[] = { 125, 133, 111, 200, 250 };
+const uint16_t speed[] = { 125, 133, 111, 200, 250 };
 
 //Index values for the speed array
 #define SPEEDPLAYER         0
@@ -151,8 +151,26 @@ void movePlayer(Player *pawn) {
         }
         else { displayPixel(pawn->x, pawn->y, BLACK); }
         //Tunnel Tests
-        if ((testY == 17) && (testX == 1)) { testX = 29; }
-        if ((testY == 17) && (testX == 30)) { testX = 2; }
+        if (testY == 17) {
+            if (testX == 1) { testX = 29; } //Warp left to right
+            else if (testX == 30) { testX = 2; } //Warp right to left
+            else if ((pawn->id) && (pawn->travelDir == LEFT)) {
+                if (testX == 7) { pawn->speedMode = SPEEDENEMYTUNNEL; } //Slow down
+                if (testX == 23) {
+                    //Speed Up
+                    if (enemyMode != FRIGHT) { pawn->speedMode = SPEEDENEMY; }
+                    else { pawn->speedMode = SPEEDENEMYFRIGHT; }
+                }
+            }
+            else if ((pawn->id) && (pawn->travelDir == RIGHT)) {
+                if (testX == 24) {pawn->speedMode = SPEEDENEMYTUNNEL; } //Slow down
+                if (testX == 8) {
+                    //Speed Up
+                    if (enemyMode != FRIGHT) { pawn->speedMode = SPEEDENEMY; }
+                    else { pawn->speedMode = SPEEDENEMYFRIGHT; }
+                }
+            }
+        }
         //increment player position
         pawn->x = testX;
         pawn->y = testY;
@@ -600,7 +618,6 @@ int main(int argn, char **argv)
         Level1: player  80%, 90% (fright)   125ms, 111ms
         Level1: enemy   75%, 50% (fright)   133ms, 200ms
     */
-    //TODO: Speed change for enemies in tunnel (lvl1 40%)
     //TODO: PowerPixel blink
     //TODO: Implement extra lives
     //TODO: Implement global dot counter (when life lost; 7/17/32 dots)
@@ -611,7 +628,6 @@ int main(int argn, char **argv)
         3) Retreating should be at highest speed
     */
     //TODO: Incremental score for eating enemies
-    //TODO: BUG: Second PowerPixel sets lastBehavior as FRIGHT == Infinite FRIGHT
 
     level = 0;
     //set initial values for player and enemies
