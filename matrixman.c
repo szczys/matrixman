@@ -161,9 +161,12 @@ void movePlayer(Player *pawn) {
         //gobble the dot
         if ((pawn == &myGuy) && isPixel(pawn->x,pawn->y)) {
             dotTracker[pawn->y] &= ~(1<<(31-pawn->x));  //Remove dot from the board
-            //TODO: add dot time penalty here
             gobbleCount();  //Increment dotCounts
+            //There is a speed hit for each dot
+            pawn->speed += 17;  // ~1/60th of a second
             if (isPowerPixel(pawn->x, pawn->y)) {
+                //Additional speed hit for PowerPixels
+                pawn->speed += 33;  // ~ 2/60th of a second
                 //Switch to Fright mode
                 changeBehavior(FRIGHT);
             }
@@ -605,6 +608,7 @@ int main(int argn, char **argv)
     /*TODO: When enemy in fright mode is eaten and makes it back to house:
         1) It should emerge as a danger to player (can be re-eaten)
         2) Does it go back into SCATTER/CHASE mode?
+        3) Retreating should be at highest speed
     */
     //TODO: Incremental score for eating enemies
     //TODO: BUG: Second PowerPixel sets lastBehavior as FRIGHT == Infinite FRIGHT
