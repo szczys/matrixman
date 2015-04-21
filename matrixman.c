@@ -25,7 +25,8 @@ uint16_t frightTimer;   //Counts down to end of FRIGHT mode
 uint8_t lastBehavior;   //Saves mode before entering FRIGHT
 uint16_t dotTimer;      //Countdown release enemies if dots not eaten
 uint16_t level;         //Which level is currently running (zero index)
-uint8_t nextDir;        //Stores the newest direction input from user 
+uint8_t nextDir;        //Stores the newest direction input from user
+uint8_t powerPixelColor;    //Used to facilitate flashing of the powerPixels
 
 //enemyMode types
 #define SCATTER 0
@@ -608,6 +609,61 @@ void playerTick(Player * pawn) {
     }
 }
 
+void setupLevel(void) {
+    //Call this to redraw level
+    //All current setting for dots and players are used
+
+    //Draw the board
+    for (uint16_t i = 2; i < 34; i++) {
+        for (uint16_t j = 0; j<32; j++) {
+            if (board[i] & (1<<(31-j))) {    //Invert the x (big endian)
+                displayPixel(j, i, BLUE); 
+            }
+        }
+    }
+
+    //Draw the dots
+    for (uint16_t i = 2; i < 34; i++) {
+        for (uint16_t j = 0; j<32; j++) {
+            if (dotTracker[i] & (1<<(31-j))) {    //Invert the x (big endian)
+                displayPixel(j, i, GREY); 
+            }
+        }
+    }
+
+    //Draw PowerPixels
+    displayPixel(PP1COL, PP1ROW, WHITE);
+    displayPixel(PP1COL, PP2ROW, WHITE);
+    displayPixel(PP2COL, PP1ROW, WHITE);
+    displayPixel(PP2COL, PP2ROW, WHITE);
+
+    //Draw the player
+    displayPixel(myGuy.x, myGuy.y, myGuy.color);
+    displayLatch(); //Redraws display (if necessary)
+}
+
+void setupDefaults(void) {
+    //TODO: may want to make level a parameter
+    level = 0;
+    //set initial values for player and enemies
+    setupPlayer(&myGuy,0,0);
+    setupPlayer(&enemy1,1,0);
+    enemy1.inPlay = TRUE; //Enemy1 always starts inPlay
+    setupPlayer(&enemy2,2,0);
+    setupPlayer(&enemy3,3,30);
+    setupPlayer(&enemy4,4,60);
+    enemyMode = SCATTER;
+}
+
+void refreshDotTracker(void) {
+    //Get Dot-tracking array ready
+    for (uint8_t i=0; i<36; i++) {
+        dotTracker[i] = 0x00000000;
+    }
+    //Copy dots from the static array
+    for (uint16_t i = 2; i < 34; i++) { dotTracker[i] = dots[i]; }
+}
+
 int main(int argn, char **argv)
 {
     //TODO: Level change: Update dot counters by level
@@ -629,60 +685,19 @@ int main(int argn, char **argv)
     */
     //TODO: Incremental score for eating enemies
 
-    level = 0;
-    //set initial values for player and enemies
-    setupPlayer(&myGuy,0,0);
-    setupPlayer(&enemy1,1,0);
-    enemy1.inPlay = TRUE; //Enemy1 always starts inPlay
-    setupPlayer(&enemy2,2,0);
-    setupPlayer(&enemy3,3,30);
-    setupPlayer(&enemy4,4,60);
-    enemyMode = SCATTER;
-
+    setupDefaults();
     initDisplay();
+    refreshDotTracker();
+    setupLevel();       //show everything on the display
 
-    //Draw the board
-    for (uint16_t i = 2; i < 34; i++) {
-        for (uint16_t j = 0; j<32; j++) {
-            if (board[i] & (1<<(31-j))) {    //Invert the x (big endian)
-                displayPixel(j, i, BLUE); 
-            }
-        }
-    }
-
-    //Get Dot-tracking array ready
-    for (uint8_t i=0; i<36; i++) {
-        dotTracker[i] = 0x00000000;
-    }
-    //Draw the dots
-    for (uint16_t i = 2; i < 34; i++) {
-        //Copy the dots to the dotTracker
-        dotTracker[i] = dots[i];
-        for (uint16_t j = 0; j<32; j++) {
-            if (dots[i] & (1<<(31-j))) {    //Invert the x (big endian)
-                displayPixel(j, i, GREY); 
-            }
-        }
-    }
-
-    //Draw PowerPixels
-    displayPixel(PP1COL, PP1ROW, WHITE);
-    displayPixel(PP1COL, PP2ROW, WHITE);
-    displayPixel(PP2COL, PP1ROW, WHITE);
-    displayPixel(PP2COL, PP2ROW, WHITE);
-
-    //Draw the player
-    displayPixel(myGuy.x, myGuy.y, myGuy.color);
-    displayLatch(); //Redraws display (if necessary)
-
+    uint8_t programRunning = TRUE;
     gameRunning = TRUE;
-    uint16_t ticks = 0;
     uint16_t behaviorTicks = 0;
     uint8_t behaviorIndex = 0;
     nextDir = RIGHT;
     dotTimer = 0;
 
-    while (gameRunning)
+    while (programRunning)
     {
 
         //TODO: This is all input code which need to change when ported
@@ -693,81 +708,89 @@ int main(int argn, char **argv)
             case NOINPUT:
                 break;
             case ESCAPE:
-                gameRunning = 0;
+                gameRunning = FALSE;
+                programRunning = FALSE;
                 continue;
+            case BUTTON:
+                if (gameRunning = FALSE) {
+                    //Restart the game
+                }
+                break;
             default:
                 nextDir = control; 
         }
 
+        if (gameRunning) {
 
+            /* This animates the game */
 
-        /* This animates the game */
-
-        //Switch Modes
-        if (enemyMode == FRIGHT) {
-            --frightTimer;
-            /*-- This Block Flashes the enemies coming out of FRIGHT mode --*/
-            if (frightTimer <= 1800) {
-                if (frightTimer%200 == 0) {
-                    uint8_t flashColor;
-                    if ((frightTimer/200)%2) {
-                        //1800 1400 1000 600 200
-                        flashColor = WHITE;
+            //Switch Modes
+            if (enemyMode == FRIGHT) {
+                --frightTimer;
+                /*-- This Block Flashes the enemies coming out of FRIGHT mode --*/
+                if (frightTimer <= 1800) {
+                    if (frightTimer%200 == 0) {
+                        uint8_t flashColor;
+                        if ((frightTimer/200)%2) {
+                            //1800 1400 1000 600 200
+                            flashColor = WHITE;
+                        }
+                        else {
+                            //1600 1200 800 4000 0
+                            flashColor = LAVENDAR;
+                        }
+                        flashEnemy(&enemy1, flashColor);
+                        flashEnemy(&enemy2, flashColor);
+                        flashEnemy(&enemy3, flashColor);
+                        flashEnemy(&enemy4, flashColor);
                     }
-                    else {
-                        //1600 1200 800 4000 0
-                        flashColor = LAVENDAR;
-                    }
-                    flashEnemy(&enemy1, flashColor);
-                    flashEnemy(&enemy2, flashColor);
-                    flashEnemy(&enemy3, flashColor);
-                    flashEnemy(&enemy4, flashColor);
+                }
+                //Leave fright mode when timer expires
+                if (frightTimer == 0) { changeBehavior(lastBehavior); }
+            }
+            //Switch between SCATTER and CHASE depending on level paramaters
+            //This is an else statement so that the timer doesn't run during FRIGHT mode
+            else if (behaviorTicks++ > behaviors[behaviorIndex]) {
+                if (behaviors[behaviorIndex] > 0) {
+                    //Checking for 0 lets us run final behavior forever
+                    behaviorIndex++;
+                    behaviorTicks = 0;
+
+                    if (behaviorIndex % 2) { changeBehavior(CHASE); }
+                    else { changeBehavior(SCATTER); }
                 }
             }
-            //Leave fright mode when timer expires
-            if (frightTimer == 0) { changeBehavior(lastBehavior); }
-        }
-        //Switch between SCATTER and CHASE depending on level paramaters
-        //This is an else statement so that the timer doesn't run during FRIGHT mode
-        else if (behaviorTicks++ > behaviors[behaviorIndex]) {
-            if (behaviors[behaviorIndex] > 0) {
-                //Checking for 0 lets us run final behavior forever
-                behaviorIndex++;
-                behaviorTicks = 0;
 
-                if (behaviorIndex % 2) { changeBehavior(CHASE); }
-                else { changeBehavior(SCATTER); }
+            //decrement counter and check for trigger
+            //set target or take user input
+            //choose route
+            //movePiece
+            //checkEaten
+
+            enemyTick(&enemy1);
+            enemyTick(&enemy2);
+            enemyTick(&enemy3);
+            enemyTick(&enemy4);
+
+            playerTick(&myGuy);
+
+            //Enemy dot counters
+            checkDots(&enemy1, FALSE);
+            checkDots(&enemy2, FALSE);
+            checkDots(&enemy3, FALSE);
+            checkDots(&enemy4, FALSE);
+
+            if (dotTimer++ >= 4000) {
+                //TODO: this time limit should change at lvl5+
+                expiredDotTimer();
             }
-        }
 
-        //decrement counter and check for trigger
-        //set target or take user input
-        //choose route
-        //movePiece
-        //checkEaten
-
-        enemyTick(&enemy1);
-        enemyTick(&enemy2);
-        enemyTick(&enemy3);
-        enemyTick(&enemy4);
-
-        playerTick(&myGuy);
-
-        //Enemy dot counters
-        checkDots(&enemy1, FALSE);
-        checkDots(&enemy2, FALSE);
-        checkDots(&enemy3, FALSE);
-        checkDots(&enemy4, FALSE);
-
-        if (dotTimer++ >= 4000) {
-            //TODO: this time limit should change at lvl5+
-            expiredDotTimer();
-        }
-
-        controlDelayMs(1);
-        /* End of game animation */
+            controlDelayMs(1);
+            /* End of game animation */
+       }
    }
 
+    //TODO: Allow game to be restarted instead of exiting
     displayClose();
 
     return 0;

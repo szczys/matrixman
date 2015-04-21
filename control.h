@@ -6,6 +6,7 @@
 //Miscellaneous
 #define ESCAPE  4
 #define NOINPUT 5
+#define BUTTON  6
 
 /*---- Prototypes ----*/
 void initControl(void);
