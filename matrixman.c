@@ -32,6 +32,7 @@ uint16_t behaviorTicks; //Timer for switch from scatter to chase
 uint8_t behaviorIndex;  //Index that tracks timer values for mode changes
 uint8_t useGlobalDot;       //FALSE = use enemy dot counters, TRUE = use globalDotCounter
 uint16_t globalDotCounter;  // after death, release ghosts on dots eaten: 7/17/32
+uint32_t score;
 
 //enemyMode types
 #define SCATTER 0
@@ -190,12 +191,15 @@ void movePlayer(Player *pawn) {
         //gobble the dot
         if ((pawn == &myGuy) && isPixel(pawn->x,pawn->y)) {
             dotTracker[pawn->y] &= ~(1<<(31-pawn->x));  //Remove dot from the board
+            score += 10;
             gobbleCount();  //Increment dotCounts
             //There is a speed hit for each dot
             pawn->speed += 17;  // ~1/60th of a second
             if (isPowerPixel(pawn->x, pawn->y)) {
                 //Additional speed hit for PowerPixels
                 pawn->speed += 33;  // ~ 2/60th of a second
+                //Additional points for gobbling this powerPixel
+                score += 40;
                 //Switch to Fright mode
                 changeBehavior(FRIGHT);
             }
@@ -590,7 +594,7 @@ void checkEaten(void) {
             wasEaten(&myGuy, &enemy4))
         {
             //Game over
-            printf("Game Over\nScore: %d\n\n", myGuy.dotCount * 10);
+            printf("Game Over\nScore: %d\n\n", score);
             gameRunning = FALSE;
         }
     }
@@ -756,6 +760,7 @@ int main(int argn, char **argv)
     behaviorIndex = 0;
     nextDir = RIGHT;
     dotTimer = 0;
+    score = 0;
 
     while (programRunning)
     {
