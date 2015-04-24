@@ -28,6 +28,8 @@ uint16_t level;         //Which level is currently running (zero index)
 uint8_t nextDir;        //Stores the newest direction input from user
 uint8_t powerPixelColor;    //Used to facilitate flashing of the powerPixels
 uint8_t lives;          //Remaining extra lives
+uint16_t behaviorTicks; //Timer for switch from scatter to chase
+uint8_t behaviorIndex;  //Index that tracks timer values for mode changes
 
 //enemyMode types
 #define SCATTER 0
@@ -657,7 +659,7 @@ void setupLevel(void) {
 void setupDefaults(void) {
     //TODO: may want to make level a parameter
     level = 0;
-    lives = 5;
+    lives = 2;
 
     //set initial values for player and enemies
     setupPlayer(&myGuy,0,0);
@@ -670,6 +672,9 @@ void setupDefaults(void) {
 }
 
 void deathRestart(void) {
+    //Reset behavioral timer and index
+    behaviorIndex = 0;
+    behaviorTicks = 0;
 
     //set initial values for player and enemies
     setupPlayerAfterDeath(&myGuy);
@@ -725,8 +730,8 @@ int main(int argn, char **argv)
 
     uint8_t programRunning = TRUE;
     gameRunning = TRUE;
-    uint16_t behaviorTicks = 0;
-    uint8_t behaviorIndex = 0;
+    behaviorTicks = 0;
+    behaviorIndex = 0;
     nextDir = RIGHT;
     dotTimer = 0;
 
@@ -823,7 +828,6 @@ int main(int argn, char **argv)
         }
 
         if ((lives > 0) && (gameRunning == FALSE)) {
-            //TODO: Make this decrement lives
             --lives;
             //TODO: Pause after a life is lost
             displayClear(BLACK);
