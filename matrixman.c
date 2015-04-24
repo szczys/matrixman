@@ -30,6 +30,8 @@ uint8_t powerPixelColor;    //Used to facilitate flashing of the powerPixels
 uint8_t lives;          //Remaining extra lives
 uint16_t behaviorTicks; //Timer for switch from scatter to chase
 uint8_t behaviorIndex;  //Index that tracks timer values for mode changes
+uint8_t useGlobalDot;       //FALSE = use enemy dot counters, TRUE = use globalDotCounter
+uint16_t globalDotCounter;  // after death, release ghosts on dots eaten: 7/17/32
 
 //enemyMode types
 #define SCATTER 0
@@ -84,22 +86,27 @@ uint8_t canMove(uint8_t nextX, uint8_t nextY) {
 void gobbleCount(void) {
     myGuy.dotCount += 1;
     dotTimer = 0;   //Reset timer
-
-    if (enemy1.inPlay == FALSE) {
-        enemy1.dotCount += 1;
-        return;
+    
+    if (useGlobalDot) {
+        if (globalDotCounter <= 32) { ++globalDotCounter; }
     }
-    if (enemy2.inPlay == FALSE) {
-        enemy2.dotCount += 1;
-        return;
-    }
-    if (enemy3.inPlay == FALSE) {
-        enemy3.dotCount += 1;
-        return;
-    }
-    if (enemy4.inPlay == FALSE) {
-        enemy4.dotCount += 1;
-        return;
+    else {
+        if (enemy1.inPlay == FALSE) {
+            enemy1.dotCount += 1;
+            return;
+        }
+        if (enemy2.inPlay == FALSE) {
+            enemy2.dotCount += 1;
+            return;
+        }
+        if (enemy3.inPlay == FALSE) {
+            enemy3.dotCount += 1;
+            return;
+        }
+        if (enemy4.inPlay == FALSE) {
+            enemy4.dotCount += 1;
+            return;
+        }
     }
 }
 
@@ -413,7 +420,19 @@ void setTarget(uint8_t index) {
 }
 
 void checkDots(Player *pawn, uint8_t force) {
-    if ((force == TRUE) || ((pawn->inPlay == FALSE) && (pawn->dotCount >= pawn->dotLimit))) {
+    uint8_t releaseEnemy = FALSE;
+    if (pawn->inPlay == TRUE) { return; }   //Do nothing if enemy already in play
+    if (force == TRUE) { releaseEnemy = TRUE; }
+    else if (useGlobalDot) {
+        //These global dot thresholds are always the same
+        if ((pawn->id == 2) && globalDotCounter >= 7) { releaseEnemy = TRUE; }
+        if ((pawn->id == 3) && globalDotCounter >= 17) { releaseEnemy = TRUE; }
+        if ((pawn->id == 4) && globalDotCounter >= 32) { releaseEnemy = TRUE; }
+    }
+    else if (pawn->dotCount >= pawn->dotLimit) { releaseEnemy = TRUE; }
+
+    if (releaseEnemy) {
+        printf("release enemy\n");
         displayPixel(pawn->x, pawn->y, BLACK); //erase current locaiton
         pawn->x = 18;
         pawn->y = 14;
@@ -597,6 +616,7 @@ void expiredDotTimer(void) {
     dotTimer = 0;   //Reset timer
     printf("dotTimer expired.\n");
 
+    //Will try releasing the high priority enemy and return if successful
     if (enemy1.inPlay == FALSE) { checkDots(&enemy1, TRUE); return; }
     if (enemy2.inPlay == FALSE) { checkDots(&enemy2, TRUE); return; }
     if (enemy3.inPlay == FALSE) { checkDots(&enemy3, TRUE); return; }
@@ -669,6 +689,7 @@ void setupDefaults(void) {
     setupPlayer(&enemy3,3,30);
     setupPlayer(&enemy4,4,60);
     enemyMode = SCATTER;
+    useGlobalDot = FALSE;
 }
 
 void deathRestart(void) {
@@ -684,6 +705,7 @@ void deathRestart(void) {
     setupPlayerAfterDeath(&enemy3);
     setupPlayerAfterDeath(&enemy4);
     enemyMode = SCATTER;
+    useGlobalDot = TRUE;
 }
 
 void refreshDotTracker(void) {
