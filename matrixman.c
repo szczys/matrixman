@@ -225,14 +225,14 @@ void playerRoute(Player *pawn, uint8_t nextDir) {
             testX++;
             break;
     }
-    
+
     if (canMove(testX, testY)) { pawn->travelDir = nextDir; }   
 }
 
 void routeChoice(Player *pawn) {
     //This function is only used for enemies. NEVER for the player
     //TODO: This function works but seems overly complex
-    
+
     //Does the pawn have a choice of routes right now?
     uint8_t testX = pawn->x;
     uint8_t testY = pawn->y;
@@ -626,16 +626,11 @@ void setupLevel(void) {
     for (uint16_t i = 2; i < 34; i++) {
         for (uint16_t j = 0; j<32; j++) {
             if (dotTracker[i] & (1<<(31-j))) {    //Invert the x (big endian)
-                displayPixel(j, i, GREY); 
+                if (isPowerPixel(j,i)) { displayPixel(j, i, WHITE); }
+                else { displayPixel(j, i, GREY); }
             }
         }
     }
-
-    //Draw PowerPixels
-    displayPixel(PP1COL, PP1ROW, WHITE);
-    displayPixel(PP1COL, PP2ROW, WHITE);
-    displayPixel(PP2COL, PP1ROW, WHITE);
-    displayPixel(PP2COL, PP2ROW, WHITE);
 
     //Draw the player
     displayPixel(myGuy.x, myGuy.y, myGuy.color);
@@ -684,6 +679,7 @@ int main(int argn, char **argv)
         3) Retreating should be at highest speed
     */
     //TODO: Incremental score for eating enemies
+    //TODO: BUG enemies in retreat hunt again without going home if free when mode changes
 
     setupDefaults();
     initDisplay();
@@ -787,10 +783,19 @@ int main(int argn, char **argv)
 
             controlDelayMs(1);
             /* End of game animation */
-       }
+        }
+
+        if (gameRunning == FALSE) {
+            //TODO: Make this decrement lives
+            //TODO: Pause after a life is lost
+            displayClear(BLACK);
+            //TODO: These defaults shouldn't reset dot-counters, etc.
+            setupDefaults();
+            setupLevel();
+            gameRunning = TRUE;
+        }
    }
 
-    //TODO: Allow game to be restarted instead of exiting
     displayClose();
 
     return 0;
