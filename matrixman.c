@@ -27,6 +27,7 @@ uint16_t dotTimer;      //Countdown release enemies if dots not eaten
 uint16_t level;         //Which level is currently running (zero index)
 uint8_t nextDir;        //Stores the newest direction input from user
 uint8_t powerPixelColor;    //Used to facilitate flashing of the powerPixels
+uint8_t lives;          //Remaining extra lives
 
 //enemyMode types
 #define SCATTER 0
@@ -433,6 +434,19 @@ void setupPlayer(Player *pawn, uint8_t newId, uint8_t newDotLimit) {
     pawn->tarY = scatterY[pawn->id];
     pawn->dotCount = 0;
     pawn->dotLimit = newDotLimit;
+    pawn->inPlay = FALSE;
+}
+
+void setupPlayerAfterDeath(Player *pawn) {
+    pawn->x = startingX[pawn->id];
+    pawn->y = startingY[pawn->id];
+    if (pawn->id) { changeSpeed(pawn, SPEEDENEMY); }
+    else { changeSpeed(pawn, SPEEDPLAYER); }
+    pawn->travelDir = LEFT;
+    pawn->color = playerColor[pawn->id];
+    pawn->tarX = scatterX[pawn->id];
+    pawn->tarY = scatterY[pawn->id];
+    pawn->inPlay = FALSE;
 }
 
 void reverseDir(Player *pawn) {
@@ -634,12 +648,17 @@ void setupLevel(void) {
 
     //Draw the player
     displayPixel(myGuy.x, myGuy.y, myGuy.color);
+
+    drawLives();
+
     displayLatch(); //Redraws display (if necessary)
 }
 
 void setupDefaults(void) {
     //TODO: may want to make level a parameter
     level = 0;
+    lives = 5;
+
     //set initial values for player and enemies
     setupPlayer(&myGuy,0,0);
     setupPlayer(&enemy1,1,0);
@@ -650,6 +669,18 @@ void setupDefaults(void) {
     enemyMode = SCATTER;
 }
 
+void deathRestart(void) {
+
+    //set initial values for player and enemies
+    setupPlayerAfterDeath(&myGuy);
+    setupPlayerAfterDeath(&enemy1);
+    enemy1.inPlay = TRUE; //Enemy1 always starts inPlay
+    setupPlayerAfterDeath(&enemy2);
+    setupPlayerAfterDeath(&enemy3);
+    setupPlayerAfterDeath(&enemy4);
+    enemyMode = SCATTER;
+}
+
 void refreshDotTracker(void) {
     //Get Dot-tracking array ready
     for (uint8_t i=0; i<36; i++) {
@@ -657,6 +688,12 @@ void refreshDotTracker(void) {
     }
     //Copy dots from the static array
     for (uint16_t i = 2; i < 34; i++) { dotTracker[i] = dots[i]; }
+}
+
+void drawLives(void) {
+    for (int8_t i=0; i<lives; i++) {
+        displayPixel(0, 33-(i*2), YELLOW);
+    }
 }
 
 int main(int argn, char **argv)
@@ -785,12 +822,13 @@ int main(int argn, char **argv)
             /* End of game animation */
         }
 
-        if (gameRunning == FALSE) {
+        if ((lives > 0) && (gameRunning == FALSE)) {
             //TODO: Make this decrement lives
+            --lives;
             //TODO: Pause after a life is lost
             displayClear(BLACK);
             //TODO: These defaults shouldn't reset dot-counters, etc.
-            setupDefaults();
+            deathRestart();
             setupLevel();
             gameRunning = TRUE;
         }
