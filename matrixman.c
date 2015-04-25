@@ -32,7 +32,9 @@ uint16_t behaviorTicks; //Timer for switch from scatter to chase
 uint8_t behaviorIndex;  //Index that tracks timer values for mode changes
 uint8_t useGlobalDot;       //FALSE = use enemy dot counters, TRUE = use globalDotCounter
 uint16_t globalDotCounter;  // after death, release ghosts on dots eaten: 7/17/32
-uint32_t score;
+uint32_t score;         //Keeps score
+#define EATENEMYSCOREBASE   200                 //The least you'll get for eating enemy
+uint16_t eatNextEnemyScore = EATENEMYSCOREBASE; //Doubles with each enemy eaten
 
 //enemyMode types
 #define SCATTER 0
@@ -56,6 +58,7 @@ const uint8_t scatterY[5] = { 14, 0, 0, 35, 35 };
     <index>: Player, Enemy, PlayerFright, EnemyFright, EnemyTunnel */
 const uint16_t speed[] = { 125, 133, 111, 200, 250 };
 
+
 //Index values for the speed array
 #define SPEEDPLAYER         0
 #define SPEEDENEMY          1
@@ -68,6 +71,7 @@ const uint16_t speed[] = { 125, 133, 111, 200, 250 };
 #define PP2COL    28
 #define PP1ROW    6
 #define PP2ROW    26
+
 
 /*---- Prototypes ----*/
 void enterHouse(Player *pawn);
@@ -547,6 +551,9 @@ void changeBehavior(uint8_t mode) {
         case FRIGHT:
             //TODO: Fright timer should change as levels increase
             frightTimer = 6000;
+            //Reset eatNextEnemyScore to default
+            eatNextEnemyScore = EATENEMYSCOREBASE;
+            //Save last mode but don't if last mode was FRIGHT
             if (enemyMode != FRIGHT) { lastBehavior = enemyMode; }
             enemyMode = FRIGHT;
             //Change speeds
@@ -572,6 +579,11 @@ uint8_t wasEaten(Player *player, Player *pawn) {
 void performRetreat(Player *pawn) {
     /*TODO: Each player should have enemyMode setting
         and it should be checked here */
+    //Add to the score and double the next score
+    score += eatNextEnemyScore;
+    eatNextEnemyScore = eatNextEnemyScore * 2;
+    drawScore();
+
     pawn->color = GREEN;
     pawn->tarX = scatterX[0];
     pawn->tarY = scatterY[0];
@@ -602,10 +614,10 @@ void checkEaten(void) {
     }
     else {
         //Enemies should change color and go home when eaten
-        if (wasEaten(&myGuy, &enemy1)) { performRetreat(&enemy1); }
-        if (wasEaten(&myGuy, &enemy2)) { performRetreat(&enemy2); }
-        if (wasEaten(&myGuy, &enemy3)) { performRetreat(&enemy3); }
-        if (wasEaten(&myGuy, &enemy4)) { performRetreat(&enemy4); }
+        if (wasEaten(&myGuy, &enemy1) && (enemy1.color != GREEN)) { performRetreat(&enemy1); }
+        if (wasEaten(&myGuy, &enemy2) && (enemy2.color != GREEN)) { performRetreat(&enemy2); }
+        if (wasEaten(&myGuy, &enemy3) && (enemy3.color != GREEN)) { performRetreat(&enemy3); }
+        if (wasEaten(&myGuy, &enemy4) && (enemy4.color != GREEN)) { performRetreat(&enemy4); }
     }
 }
 
