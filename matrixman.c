@@ -192,6 +192,7 @@ void movePlayer(Player *pawn) {
         if ((pawn == &myGuy) && isPixel(pawn->x,pawn->y)) {
             dotTracker[pawn->y] &= ~(1<<(31-pawn->x));  //Remove dot from the board
             score += 10;
+            drawScore();
             gobbleCount();  //Increment dotCounts
             //There is a speed hit for each dot
             pawn->speed += 17;  // ~1/60th of a second
@@ -200,6 +201,7 @@ void movePlayer(Player *pawn) {
                 pawn->speed += 33;  // ~ 2/60th of a second
                 //Additional points for gobbling this powerPixel
                 score += 40;
+                drawScore();
                 //Switch to Fright mode
                 changeBehavior(FRIGHT);
             }
@@ -724,6 +726,13 @@ void refreshDotTracker(void) {
 void drawLives(void) {
     for (int8_t i=0; i<lives; i++) {
         displayPixel(0, 33-(i*2), YELLOW);
+    }
+}
+
+void drawScore(void) {
+    for (int8_t i=0; i<32; i++) {
+        if (score & (1<<i)) { displayPixel(31, 33-i, WHITE); }
+        else { displayPixel(31, 33-i, BLACK); }
     }
 }
 
