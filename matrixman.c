@@ -75,7 +75,7 @@ const uint16_t speed[] = { 125, 133, 111, 200, 250 };
 
 /*---- Prototypes ----*/
 void enterHouse(Player *pawn);
-void changeBehavior(uint8_t mode);
+void changeBehavior(Player *pawn, uint8_t mode);
 void changeSpeed(Player *pawn, uint8_t index);
 /*--------------------*/
 
@@ -206,8 +206,19 @@ void movePlayer(Player *pawn) {
                 //Additional points for gobbling this powerPixel
                 score += 40;
                 drawScore();
-                //Switch to Fright mode
-                changeBehavior(FRIGHT);
+                /*---Switch to Fright mode---*/
+                //Save last mode but don't if last mode was FRIGHT
+                if (enemyMode != FRIGHT) { lastBehavior = enemyMode; }
+                enemyMode = FRIGHT;
+                frightTimer = 6000; //TODO: This should change with each level
+                //Reset eatNextEnemyScore to default
+                eatNextEnemyScore = EATENEMYSCOREBASE;
+
+                changeBehavior(&myGuy, enemyMode);
+                changeBehavior(&enemy1, enemyMode);
+                changeBehavior(&enemy2, enemyMode);
+                changeBehavior(&enemy3, enemyMode);
+                changeBehavior(&enemy4, enemyMode);
             }
         }
     }
@@ -507,66 +518,37 @@ void changeSpeed(Player *pawn, uint8_t index) {
     pawn->speed = speed[(level * 5) + index];
 }
 
-void changeBehavior(uint8_t mode) {
+void changeBehavior(Player *pawn, uint8_t mode) {
+    //GREEN means enemy is in retreat mode; do nothing
+    if (pawn->color == GREEN) { return; }
     //Enemies should reverse current direction when modes change
     //Unless coming out of FRIGHT mode
-    if (enemyMode != FRIGHT) {
-        reverseDir(&enemy1);
-        reverseDir(&enemy2);
-        reverseDir(&enemy3);
-        reverseDir(&enemy4);
-    }
+    if (enemyMode != FRIGHT) { reverseDir(pawn); }
     else {
         //No longer frightened, revive natural color
-        if (enemy1.color != GREEN) { enemy1.color = playerColor[enemy1.id]; }
-        if (enemy2.color != GREEN) { enemy2.color = playerColor[enemy2.id]; }
-        if (enemy3.color != GREEN) { enemy3.color = playerColor[enemy3.id]; }
-        if (enemy4.color != GREEN) { enemy4.color = playerColor[enemy4.id]; }
+        pawn->color = playerColor[pawn->id];
     }
 
     switch(mode) {
         case SCATTER:
             //Change Speed
-            myGuy.speedMode = SPEEDPLAYER;
-            enemy1.speedMode = SPEEDENEMY;
-            enemy2.speedMode = SPEEDENEMY;
-            enemy3.speedMode = SPEEDENEMY;
-            enemy4.speedMode = SPEEDENEMY;
+            if (pawn->id == 0) { pawn->speedMode = SPEEDPLAYER; return; } //
+                //The rest are only for enemies
+            pawn->speedMode = SPEEDENEMY;
             //Change Targets
-            setScatterTar(&enemy1);
-            setScatterTar(&enemy2);
-            setScatterTar(&enemy3);
-            setScatterTar(&enemy4);
-            enemyMode = SCATTER;
+            setScatterTar(pawn);
             break;
         case CHASE:
             //Change Speed
-            myGuy.speedMode = SPEEDPLAYER;
-            enemy1.speedMode = SPEEDENEMY;
-            enemy2.speedMode = SPEEDENEMY;
-            enemy3.speedMode = SPEEDENEMY;
-            enemy4.speedMode = SPEEDENEMY;
-            enemyMode = CHASE;
+            if (pawn->id == 0) { pawn->speedMode = SPEEDPLAYER; return; }
+            pawn->speedMode = SPEEDENEMY;
             break;
         case FRIGHT:
-            //TODO: Fright timer should change as levels increase
-            frightTimer = 6000;
-            //Reset eatNextEnemyScore to default
-            eatNextEnemyScore = EATENEMYSCOREBASE;
-            //Save last mode but don't if last mode was FRIGHT
-            if (enemyMode != FRIGHT) { lastBehavior = enemyMode; }
-            enemyMode = FRIGHT;
             //Change speeds
-            myGuy.speedMode = SPEEDPLAYERFRIGHT;
-            enemy1.speedMode = SPEEDENEMYFRIGHT;
-            enemy2.speedMode = SPEEDENEMYFRIGHT;
-            enemy3.speedMode = SPEEDENEMYFRIGHT;
-            enemy4.speedMode = SPEEDENEMYFRIGHT;
+            if (pawn->id == 0) { pawn->speedMode = SPEEDPLAYERFRIGHT; return; }
+            pawn->speedMode = SPEEDENEMYFRIGHT;
             //Fix colors
-            enemy1.color = LAVENDAR;
-            enemy2.color = LAVENDAR;
-            enemy3.color = LAVENDAR;
-            enemy4.color = LAVENDAR;
+            pawn->color = LAVENDAR;
             break;
     }
 }
@@ -832,7 +814,13 @@ int main(int argn, char **argv)
                     }
                 }
                 //Leave fright mode when timer expires
-                if (frightTimer == 0) { changeBehavior(lastBehavior); }
+                if (frightTimer == 0) { enemyMode = lastBehavior; }
+
+                changeBehavior(&myGuy, enemyMode);
+                changeBehavior(&enemy1, enemyMode);
+                changeBehavior(&enemy2, enemyMode);
+                changeBehavior(&enemy3, enemyMode);
+                changeBehavior(&enemy4, enemyMode);
             }
             //Switch between SCATTER and CHASE depending on level paramaters
             //This is an else statement so that the timer doesn't run during FRIGHT mode
@@ -842,8 +830,14 @@ int main(int argn, char **argv)
                     behaviorIndex++;
                     behaviorTicks = 0;
 
-                    if (behaviorIndex % 2) { changeBehavior(CHASE); }
-                    else { changeBehavior(SCATTER); }
+                    if (behaviorIndex % 2) { enemyMode = CHASE; }
+                    else { enemyMode = SCATTER; }
+
+                    changeBehavior(&myGuy, enemyMode);
+                    changeBehavior(&enemy1, enemyMode);
+                    changeBehavior(&enemy2, enemyMode);
+                    changeBehavior(&enemy3, enemyMode);
+                    changeBehavior(&enemy4, enemyMode);
                 }
             }
 
