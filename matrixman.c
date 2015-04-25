@@ -57,6 +57,8 @@ const uint8_t scatterY[5] = { 14, 0, 0, 35, 35 };
 /* Speed is indexed as follows: [(level * 5) + <index>]
     <index>: Player, Enemy, PlayerFright, EnemyFright, EnemyTunnel */
 const uint16_t speed[] = { 125, 133, 111, 200, 250 };
+const uint8_t dotLimitTable[] = { 0, 0, 0, 30, 60,
+                                0, 0, 0, 0, 50 };
 
 
 //Index values for the speed array
@@ -279,7 +281,7 @@ void routeChoice(Player *pawn) {
     route1 = 6000;
     route2 = 6000;
     route3 = 6000;
-    
+
     /*TODO: Fix this dirty hack 
         This whole block is ineloquent
         Check for "GREEN" color is workaround for retreating in FRIGHT mode
@@ -465,7 +467,7 @@ void checkDots(Player *pawn, uint8_t force) {
     }
 }
 
-void setupPlayer(Player *pawn, uint8_t newId, uint8_t newDotLimit) {
+void setupPlayer(Player *pawn, uint8_t newId) {
     pawn->id = newId;
     pawn->x = startingX[pawn->id];
     pawn->y = startingY[pawn->id];
@@ -476,7 +478,8 @@ void setupPlayer(Player *pawn, uint8_t newId, uint8_t newDotLimit) {
     pawn->tarX = scatterX[pawn->id];
     pawn->tarY = scatterY[pawn->id];
     pawn->dotCount = 0;
-    pawn->dotLimit = newDotLimit;
+    if (level >= 3) { pawn->dotLimit = 0; }
+    else { pawn->dotLimit = dotLimitTable[(level*5)+pawn->id]; }
     pawn->inPlay = FALSE;
 }
 
@@ -684,12 +687,12 @@ void setupDefaults(void) {
     lives = 2;
 
     //set initial values for player and enemies
-    setupPlayer(&myGuy,0,0);
-    setupPlayer(&enemy1,1,0);
+    setupPlayer(&myGuy,0);
+    setupPlayer(&enemy1,1);
     enemy1.inPlay = TRUE; //Enemy1 always starts inPlay
-    setupPlayer(&enemy2,2,0);
-    setupPlayer(&enemy3,3,30);
-    setupPlayer(&enemy4,4,60);
+    setupPlayer(&enemy2,2);
+    setupPlayer(&enemy3,3);
+    setupPlayer(&enemy4,4);
     enemyMode = SCATTER;
     useGlobalDot = FALSE;
 }
@@ -743,16 +746,12 @@ int main(int argn, char **argv)
         Level1: enemy   75%, 50% (fright)   133ms, 200ms
     */
     //TODO: PowerPixel blink
-    //TODO: Implement extra lives
-    //TODO: Implement global dot counter (when life lost; 7/17/32 dots)
     //TODO: bonus food
     /*TODO: When enemy in fright mode is eaten and makes it back to house:
         1) It should emerge as a danger to player (can be re-eaten)
         2) Does it go back into SCATTER/CHASE mode?
         3) Retreating should be at highest speed
     */
-    //TODO: Incremental score for eating enemies
-    //TODO: BUG enemies in retreat hunt again without going home if free when mode changes
 
     setupDefaults();
     initDisplay();
