@@ -375,10 +375,11 @@ void routeChoice(Player *pawn) {
     }
 }
 
-void setTarget(uint8_t index) {
+void setTarget(Player *pawn) {
     if (enemyMode != CHASE) { return; }
+    if (pawn->color == GREEN) { return; } //Don't interrupt retreat
     int8_t tempNum;
-    switch (index) {
+    switch (pawn->id) {
         case 1:
             /*--------------- Enemy1 ------------------*/
             enemy1.tarX = myGuy.x;
@@ -521,19 +522,20 @@ void changeSpeed(Player *pawn, uint8_t index) {
 void changeBehavior(Player *pawn, uint8_t mode) {
     //GREEN means enemy is in retreat mode; do nothing
     if (pawn->color == GREEN) { return; }
-    //Enemies should reverse current direction when modes change
-    //Unless coming out of FRIGHT mode
-    if (enemyMode != FRIGHT) { reverseDir(pawn); }
-    else {
-        //No longer frightened, revive natural color
+
+    if (enemyMode != FRIGHT) { 
+        //Enemies should reverse current direction when modes change
+        //Unless coming out of FRIGHT mode
+        reverseDir(pawn);
+
+        //Not FRIGHT mode so revive natural color
         pawn->color = playerColor[pawn->id];
     }
 
     switch(mode) {
         case SCATTER:
             //Change Speed
-            if (pawn->id == 0) { pawn->speedMode = SPEEDPLAYER; return; } //
-                //The rest are only for enemies
+            if (pawn->id == 0) { pawn->speedMode = SPEEDPLAYER; return; }
             pawn->speedMode = SPEEDENEMY;
             //Change Targets
             setScatterTar(pawn);
@@ -625,7 +627,7 @@ void expiredDotTimer(void) {
 
 void enemyTick(Player *pawn) {
     if (--pawn->speed == 0) {
-        setTarget(pawn->id);
+        setTarget(pawn);
         routeChoice(pawn);
         movePlayer(pawn);
         checkEaten();
