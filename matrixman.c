@@ -541,7 +541,6 @@ void setScatterTar(Player *pawn) {
 }
 
 void changeSpeed(Player *pawn, uint8_t index) {
-    //multiplying by 5 offsets single-level array for diff levels
     uint8_t rowOffset;
     if (level == 0) { rowOffset = 0; }
     else if ((level >= 1) && (level <= 3)) { rowOffset = 5; }
@@ -588,6 +587,7 @@ void changeBehavior(Player *pawn, uint8_t mode) {
 }
 
 uint8_t wasEaten(Player *player, Player *pawn) {
+    if (pawn->color == GREEN) { return FALSE; } //GREEN is enemy in retreat -- no collision
     if ((player->x == pawn->x) && (player->y == pawn->y)) { return TRUE; }
     return FALSE;
 }
