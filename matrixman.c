@@ -542,7 +542,13 @@ void setScatterTar(Player *pawn) {
 
 void changeSpeed(Player *pawn, uint8_t index) {
     //multiplying by 5 offsets single-level array for diff levels
-    pawn->speed = speed[(level * 5) + index];
+    uint8_t rowOffset;
+    if (level == 0) { rowOffset = 0; }
+    else if ((level >= 1) && (level <= 3)) { rowOffset = 5; }
+    else if ((level >= 4) && (level <= 19)) { rowOffset = 10; }
+    else { rowOffset = 15; }
+
+    pawn->speed = speed[index + rowOffset];
 }
 
 void changeBehavior(Player *pawn, uint8_t mode) {
@@ -903,7 +909,6 @@ int main(int argn, char **argv)
                     --lives;
                     //TODO: Pause after a life is lost
                     displayClear(BLACK);
-                    //TODO: These defaults shouldn't reset dot-counters, etc.
                     deathRestart();
                 }
 
