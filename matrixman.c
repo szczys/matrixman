@@ -27,7 +27,7 @@ uint16_t dotTimer;      //Countdown release enemies if dots not eaten
 uint16_t level;         //Which level is currently running (zero index)
 uint8_t nextDir;        //Stores the newest direction input from user
 uint8_t powerPixelColor;    //Used to facilitate flashing of the powerPixels
-uint8_t lives;          //Remaining extra lives
+int8_t lives;          //Remaining extra lives
 uint16_t behaviorTicks; //Timer for switch from scatter to chase
 uint8_t behaviorIndex;  //Index that tracks timer values for mode changes
 uint8_t useGlobalDot;       //FALSE = use enemy dot counters, TRUE = use globalDotCounter
@@ -54,9 +54,27 @@ const uint8_t startingY[5] = { 26, 14, 16, 17, 17 };
     //Player doesn't have scatter so 0 index is retreat coordinates
 const uint8_t scatterX[5] = { 15, 27, 4, 2, 29 };
 const uint8_t scatterY[5] = { 14, 0, 0, 35, 35 };
+
+/*TODO: Level change: Player and enemy speed changes
+    100% = 10/second = 100ms ticks
+    17ms speed penalty per dot gobbled
+    50ms speed penalty for power pellet
+
+                player  fright  enemy   fright  tunnel
+    Level 1     80% 125 90% 111 75% 133 50% 200 40% 250
+    Level 2-4   90% 111 95% 105 85% 118 55% 182 45% 222
+    Level 5-20      100     100 95% 105 60% 167 50% 200
+    Level 21+   90% 111     111 95% 105     105 50% 200
+*/
+
 /* Speed is indexed as follows: [(level * 5) + <index>]
     <index>: Player, Enemy, PlayerFright, EnemyFright, EnemyTunnel */
-const uint16_t speed[] = { 125, 133, 111, 200, 250 };
+const uint16_t speed[] = {  125, 133, 111, 200, 250,
+                            111, 118, 105, 182, 222,
+                            100, 105, 100, 167, 200,
+                            111, 105, 111, 105, 200
+                            };
+
 const uint8_t dotLimitTable[] = { 0, 0, 0, 30, 60,
                                 0, 0, 0, 0, 50 };
 
@@ -92,8 +110,13 @@ uint8_t canMove(uint8_t nextX, uint8_t nextY) {
 
 void gobbleCount(void) {
     myGuy.dotCount += 1;
+    if (myGuy.dotCount == 244) {
+        //All dots have been eaten, time for next level
+        gameRunning = FALSE;
+        return;
+    }
     dotTimer = 0;   //Reset timer
-    
+
     if (useGlobalDot) {
         if (globalDotCounter <= 32) { ++globalDotCounter; }
     }
@@ -526,7 +549,7 @@ void changeBehavior(Player *pawn, uint8_t mode) {
     //GREEN means enemy is in retreat mode; do nothing
     if (pawn->color == GREEN) { return; }
 
-    if (enemyMode != FRIGHT) { 
+    if ((enemyMode != FRIGHT) && (pawn->id)) { 
         //Enemies should reverse current direction when modes change
         //Unless coming out of FRIGHT mode
         reverseDir(pawn);
@@ -682,10 +705,7 @@ void setupLevel(void) {
 }
 
 void setupDefaults(void) {
-    //TODO: may want to make level a parameter
-    level = 0;
-    lives = 2;
-
+    refreshDotTracker();
     //set initial values for player and enemies
     setupPlayer(&myGuy,0);
     setupPlayer(&enemy1,1);
@@ -723,7 +743,7 @@ void refreshDotTracker(void) {
 }
 
 void drawLives(void) {
-    for (int8_t i=0; i<lives; i++) {
+    for (int8_t i=0; i<(lives-1); i++) {
         displayPixel(0, 33-(i*2), YELLOW);
     }
 }
@@ -738,13 +758,7 @@ void drawScore(void) {
 int main(int argn, char **argv)
 {
     //TODO: Level change: Update dot counters by level
-    /*TODO: Level change: Player and enemy speed changes
-        100% = 10/second = 100ms ticks
-        17ms speed penalty per dot gobbled
-        50ms speed penalty for power pellet
-        Level1: player  80%, 90% (fright)   125ms, 111ms
-        Level1: enemy   75%, 50% (fright)   133ms, 200ms
-    */
+
     //TODO: PowerPixel blink
     //TODO: bonus food
     /*TODO: When enemy in fright mode is eaten and makes it back to house:
@@ -753,9 +767,10 @@ int main(int argn, char **argv)
         3) Retreating should be at highest speed
     */
 
+    level = 0;
+    lives = 3;  //Including the one in play
     setupDefaults();
     initDisplay();
-    refreshDotTracker();
     setupLevel();       //show everything on the display
 
     uint8_t programRunning = TRUE;
@@ -862,7 +877,7 @@ int main(int argn, char **argv)
             checkDots(&enemy4, FALSE);
 
             if (dotTimer++ >= 4000) {
-                //TODO: this time limit should change at lvl5+
+                //TODO: this time limit should change to 3000 at lvl5+
                 expiredDotTimer();
             }
 
@@ -870,14 +885,31 @@ int main(int argn, char **argv)
             /* End of game animation */
         }
 
-        if ((lives > 0) && (gameRunning == FALSE)) {
-            --lives;
-            //TODO: Pause after a life is lost
-            displayClear(BLACK);
-            //TODO: These defaults shouldn't reset dot-counters, etc.
-            deathRestart();
-            setupLevel();
-            gameRunning = TRUE;
+        if (lives) {
+            if (gameRunning == FALSE) {
+                printf("gameRunning FALSE loop\n");
+                //Check if all the dots have been eaten
+                if (myGuy.dotCount == 244 ) {
+                    printf("next level detected\n");
+                    //get new level ready
+                    ++level;
+                    printf("Level %d\n",level);
+                    displayClear(BLACK);
+                    setupDefaults();
+                }
+                else {
+                    printf("lost life detected\n");
+                    //Life lost, restart this level
+                    --lives;
+                    //TODO: Pause after a life is lost
+                    displayClear(BLACK);
+                    //TODO: These defaults shouldn't reset dot-counters, etc.
+                    deathRestart();
+                }
+
+                setupLevel();
+                gameRunning = TRUE;
+            }
         }
    }
 
