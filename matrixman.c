@@ -911,6 +911,7 @@ int main(int argn, char **argv)
                     //TODO: Pause after a life is lost
                     displayClear(BLACK);
                     deathRestart();
+                    drawScore();
                 }
 
                 setupLevel();
