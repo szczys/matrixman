@@ -905,28 +905,25 @@ int main(int argn, char **argv)
         }
 
         //Restart if necessary
-        if (lives || (lives == 0 & myGuy.dotCount == 244)) {
-            if (gameRunning == FALSE) {
-                //Check if all the dots have been eaten
-                if (myGuy.dotCount == 244 ) {
-                    //get new level ready
-                    ++level;
-                    displayClear(BLACK);
-                    setupDefaults();
-                }
-                else {
-                    //Life lost, restart this level
-                    --lives;
-                    //TODO: Pause after a life is lost
-                    displayClear(BLACK);
-                    deathRestart();
-                    drawScore();
-                }
-
-                setupLevel();
-                gameRunning = TRUE;
-            }
+        if (myGuy.dotCount == 244) {
+            //get new level ready
+            ++level;
+            displayClear(BLACK);
+            setupDefaults();
+            setupLevel();
+            gameRunning = TRUE;
         }
+        else if (lives && gameRunning == FALSE) {
+            //Life lost, restart this level
+            --lives;
+            //TODO: Pause after a life is lost
+            displayClear(BLACK);
+            deathRestart();
+            drawScore();
+            setupLevel();
+            gameRunning = TRUE;
+        }
+
    }
 
     displayClose();
