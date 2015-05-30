@@ -1,11 +1,10 @@
+#include "matrixman.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
 #include "board.h"
 #include "dots.h"
 #include "player.h"
-#include "display.h"
-#include "control.h"
 
 uint32_t dotTracker[36];
 
@@ -100,8 +99,6 @@ void changeSpeed(Player *pawn, uint8_t index);
 void refreshDotTracker(void);
 void drawLives(void);
 void drawScore(void);
-/*--------------------*/
-
 
 //Function returns 1 if next move is not a collision with the board
 uint8_t canMove(uint8_t nextX, uint8_t nextY) {
@@ -765,7 +762,7 @@ void drawScore(void) {
     }
 }
 
-int main(int argn, char **argv)
+int playMatrixman()
 {
     //TODO: Level change: Update dot counters by level
 
