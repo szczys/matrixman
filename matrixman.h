@@ -1,4 +1,4 @@
-#include "main.h"
+#include "matrixman-teensy.h"
 
 int playMatrixman(void);
 /*--------------------*/
