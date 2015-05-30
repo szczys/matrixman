@@ -479,7 +479,6 @@ void checkDots(Player *pawn, uint8_t force) {
     else if (pawn->dotCount >= pawn->dotLimit) { releaseEnemy = TRUE; }
 
     if (releaseEnemy) {
-        printf("release enemy\n");
         displayPixel(pawn->x, pawn->y, BLACK); //erase current locaiton
         pawn->x = 18;
         pawn->y = 14;
@@ -624,7 +623,6 @@ void checkEaten(void) {
             wasEaten(&myGuy, &enemy4))
         {
             //Game over
-            printf("Game Over\nScore: %d\n\n", score);
             gameRunning = FALSE;
         }
     }
@@ -648,7 +646,6 @@ void flashEnemy(Player *pawn, uint8_t color) {
 void expiredDotTimer(void) {
     //Too long since a dot was eaten, release an enemy if you canMove
     dotTimer = 0;   //Reset timer
-    printf("dotTimer expired.\n");
 
     //Will try releasing the high priority enemy and return if successful
     if (enemy1.inPlay == FALSE) { checkDots(&enemy1, TRUE); return; }
@@ -893,18 +890,14 @@ int main(int argn, char **argv)
 
         if (lives) {
             if (gameRunning == FALSE) {
-                printf("gameRunning FALSE loop\n");
                 //Check if all the dots have been eaten
                 if (myGuy.dotCount == 244 ) {
-                    printf("next level detected\n");
                     //get new level ready
                     ++level;
-                    printf("Level %d\n",level);
                     displayClear(BLACK);
                     setupDefaults();
                 }
                 else {
-                    printf("lost life detected\n");
                     //Life lost, restart this level
                     --lives;
                     //TODO: Pause after a life is lost
