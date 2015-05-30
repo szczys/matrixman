@@ -904,7 +904,8 @@ int main(int argn, char **argv)
             /* End of game animation */
         }
 
-        if (lives) {
+        //Restart if necessary
+        if (lives || (lives == 0 & myGuy.dotCount == 244)) {
             if (gameRunning == FALSE) {
                 //Check if all the dots have been eaten
                 if (myGuy.dotCount == 244 ) {
