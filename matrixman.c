@@ -882,12 +882,12 @@ int main(int argn, char **argv)
             //movePiece
             //checkEaten
 
-            enemyTick(&enemy1);
-            enemyTick(&enemy2);
-            enemyTick(&enemy3);
-            enemyTick(&enemy4);
+            if (gameRunning) { enemyTick(&enemy1); }
+            if (gameRunning) { enemyTick(&enemy2); }
+            if (gameRunning) { enemyTick(&enemy3); }
+            if (gameRunning) { enemyTick(&enemy4); }
 
-            playerTick(&myGuy);
+            if (gameRunning) { playerTick(&myGuy); }
 
             //Enemy dot counters
             checkDots(&enemy1, FALSE);
