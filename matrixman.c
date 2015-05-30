@@ -97,6 +97,9 @@ const uint8_t dotLimitTable[] = { 0, 0, 0, 30, 60,
 void enterHouse(Player *pawn);
 void changeBehavior(Player *pawn, uint8_t mode);
 void changeSpeed(Player *pawn, uint8_t index);
+void refreshDotTracker(void);
+void drawLives(void);
+void drawScore(void);
 /*--------------------*/
 
 
@@ -624,6 +627,10 @@ void checkEaten(void) {
         {
             //Game over
             gameRunning = FALSE;
+            if (lives == 0) {
+                //Display gameover message
+                displayGameOver();
+            }
         }
     }
     else {
@@ -774,6 +781,7 @@ int main(int argn, char **argv)
     lives = 2;  //Including the one in play
     setupDefaults();
     initDisplay();
+    initControl();
     setupLevel();       //show everything on the display
 
     uint8_t programRunning = TRUE;

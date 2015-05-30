@@ -30,6 +30,11 @@ void displayClear(uint8_t color) {
     SDL_RenderClear(ren);
 }
 
+void displayGameOver(void) {
+    //Display GameOver Message Here
+    printf("Game Over\n");
+}
+
 void displayPixel(uint8_t x, uint8_t y, char color) {
     SDL_Rect rect;
     //TODO: Eventually these rectangles will just be LED pixels so this number 10 is arbitrary

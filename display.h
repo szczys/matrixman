@@ -29,6 +29,7 @@ static const uint8_t colors[][3] = {
 /*---- Prototypes ----*/
 void initDisplay(void);
 void displayClear(uint8_t color);
+void displayGameOver(void);
 void displayPixel(uint8_t x, uint8_t y, char color);
 void displayClose(void);
 void displayLatch(void);
