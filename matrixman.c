@@ -746,7 +746,7 @@ void refreshDotTracker(void) {
 }
 
 void drawLives(void) {
-    for (int8_t i=0; i<(lives-1); i++) {
+    for (int8_t i=0; i<(lives); i++) {
         displayPixel(0, 33-(i*2), YELLOW);
     }
 }
@@ -771,7 +771,7 @@ int main(int argn, char **argv)
     */
 
     level = 0;
-    lives = 3;  //Including the one in play
+    lives = 2;  //Including the one in play
     setupDefaults();
     initDisplay();
     setupLevel();       //show everything on the display
@@ -799,8 +799,16 @@ int main(int argn, char **argv)
                 programRunning = FALSE;
                 continue;
             case BUTTON:
-                if (gameRunning = FALSE) {
-                    //Restart the game
+                if (gameRunning == FALSE) {
+                    gameRunning = TRUE;
+                    behaviorTicks = 0;
+                    behaviorIndex = 0;
+                    nextDir = RIGHT;
+                    dotTimer = 0;
+                    score = 0;
+                    setupDefaults();
+                    lives = 2;
+                    setupLevel();       //show everything on the display
                 }
                 break;
             default:

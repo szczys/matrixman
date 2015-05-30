@@ -30,6 +30,8 @@ uint8_t getControl(void) {
                     return LEFT;
                 case SDLK_RIGHT:
                     return RIGHT;
+                case SDLK_SPACE:
+                    return BUTTON;
             }
         }
     }
