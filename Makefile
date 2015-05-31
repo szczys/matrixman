@@ -3,13 +3,13 @@ test:
 	make run;
 
 build:
-	gcc -std=c99 -c main.c matrixman.c;
-	gcc main.o matrixman.o -lSDL2 -o main;
+	gcc -std=c99 -c matrixman.c matrixman-gamefile.c;
+	gcc matrixman.o matrixman-gamefile.o -lSDL2 -o matrixman;
 
 run:
-	./main;
+	./matrixman;
 
 clean:
-	-rm main;
+	-rm matrixman;
 	-rm *.o;
 	-rm *~
