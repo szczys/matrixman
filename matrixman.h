@@ -28,14 +28,9 @@ static const uint8_t colors[][3] = {
     { 0, 255, 0}        //Green
 };
 
-/*---- Display Prototypes ----*/
-void initDisplay(void);
-void displayClear(uint8_t color);
-void displayGameOver(void);
-void displayPixel(uint8_t x, uint8_t y, char color);
-void displayClose(void);
-void displayLatch(void);
-/*--------------------*/
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 //Directions of travel
 #define UP      0
@@ -47,7 +42,23 @@ void displayLatch(void);
 #define NOINPUT 5
 #define BUTTON  6
 
+
+/*---- Display Prototypes ----*/
+void initDisplay(void);
+void displayClear(uint8_t color);
+void displayGameOver(void);
+void displayPixel(uint8_t x, uint8_t y, char color);
+void displayClose(void);
+void displayLatch(void);
+/*--------------------*/
+
+
+
 /*---- Control Prototypes ----*/
 void initControl(void);
 uint8_t getControl(void);
 void controlDelayMs(uint16_t ms);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
