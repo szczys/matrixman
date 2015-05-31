@@ -1,7 +1,5 @@
 # Matrixman
 
----
-
 Matrixman is low-resolution take on the classic game of Pac-Man. I've been calling this "1-Pixel Pac-Man" because the player is just
 1-pixel in size. I wrote all of the code for the game, following along with the rules of the original as are described by the 
 [Pac-Man Dossier](http://home.comcast.net/~jpittman2/pacman/pacmandossier.html).
@@ -15,8 +13,6 @@ Full build information can be found on [my Hackaday.io project page](https://hac
 
 ## Main Branch
 
----
-
 The main branch is designed for Teensy 3.1 and can be compiled using the Arduino IDE and a few libraries:
 
 * [Arduino IDE](http://www.arduino.cc/en/Main/Software)
@@ -24,8 +20,6 @@ The main branch is designed for Teensy 3.1 and can be compiled using the Arduino
 * [Smartmatrix Library](https://github.com/pixelmatix/SmartMatrix)
 
 ## Hardware Emulation Branch
-
----
 
 I actually coded most of this without the hardware in hand. To do so I wrote an emulator using SDL2. It's simply a grid of
 32x32 boxes that serves as a stand-in for the SmartMatrix. The game code itself is rather complex and this really sped up
