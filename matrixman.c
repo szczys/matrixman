@@ -1,6 +1,19 @@
-//Renamed this file .cpp (from .c) just to get Arduino IDE to compile it
-//It compiles but it doesn't actually work. I think matrixman.c can't
-//get to the functions which are in matrixman-teensy.ino
+/*--------------------------
+| This is the main game file which is shared between the
+| master (teensy 3.1) and game_abstraction (which uses
+| SDL2 to emulate the hardware) branch. This file should
+| always be the same between the two branches, which will
+| allow for greater portability and for game development
+| when the hardware is not present.
+|
+| Merging between two is explained here:
+| http://jasonrudolph.com/blog/2009/02/25/git-tip-how-to-merge-specific-files-from-another-branch/
+|
+| checkout the branch you want to merge changes into then use:
+| git checkout <<branch-name-with-changes>> matrixman.c
+| git status
+| git commit -m "'Merge' changes from 'branch-name-with-changes'"
+----------------------------------------------*/
 
 #include "matrixman.h"
 #include <stdio.h>
