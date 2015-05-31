@@ -1,4 +1,4 @@
-#include "matrixman.h"
+#include "matrixman-gamefile.h"
 #include <SmartMatrix_32x32.h>
 
 SmartMatrix matrix;

@@ -1,4 +1,4 @@
-#include "matrixman-teensy.h"
+#include "matrixman.h"
 
 #ifdef __cplusplus
 extern "C"{
