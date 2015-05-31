@@ -1,3 +1,20 @@
+/*--------------------------
+| This is the main game file which is shared between the
+| master (teensy 3.1) and game_abstraction (which uses
+| SDL2 to emulate the hardware) branch. This file should
+| always be the same between the two branches, which will
+| allow for greater portability and for game development
+| when the hardware is not present.
+|
+| Merging between two is explained here:
+| http://jasonrudolph.com/blog/2009/02/25/git-tip-how-to-merge-specific-files-from-another-branch/
+|
+| checkout the branch you want to merge changes into then use:
+| git checkout <<branch-name-with-changes>> matrixman.c
+| git status
+| git commit -m "'Merge' changes from 'branch-name-with-changes'"
+----------------------------------------------*/
+
 #include "matrixman.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -685,8 +702,10 @@ void setupLevel(void) {
     //All current setting for dots and players are used
 
     //Draw the board
-    for (uint16_t i = 2; i < 34; i++) {
-        for (uint16_t j = 0; j<32; j++) {
+    uint16_t i; //Arduino IDE not set for c99 by default; booo!
+    uint16_t j; //Arduino IDE not set for c99 by default; booo!
+    for (i = 2; i < 34; i++) {
+        for (j = 0; j<32; j++) {
             if (board[i] & (1<<(31-j))) {    //Invert the x (big endian)
                 displayPixel(j, i, BLUE); 
             }
@@ -694,8 +713,8 @@ void setupLevel(void) {
     }
 
     //Draw the dots
-    for (uint16_t i = 2; i < 34; i++) {
-        for (uint16_t j = 0; j<32; j++) {
+    for (i = 2; i < 34; i++) {
+        for (j = 0; j<32; j++) {
             if (dotTracker[i] & (1<<(31-j))) {    //Invert the x (big endian)
                 if (isPowerPixel(j,i)) { displayPixel(j, i, WHITE); }
                 else { displayPixel(j, i, GREY); }
@@ -742,21 +761,25 @@ void deathRestart(void) {
 
 void refreshDotTracker(void) {
     //Get Dot-tracking array ready
-    for (uint8_t i=0; i<36; i++) {
+    uint8_t i; //Arduino IDE not set for c99 by default; booo!
+    for (i=0; i<36; i++) {
         dotTracker[i] = 0x00000000;
     }
     //Copy dots from the static array
-    for (uint16_t i = 2; i < 34; i++) { dotTracker[i] = dots[i]; }
+    uint16_t j; //Arduino IDE not set for c99 by default; booo!
+    for (j = 2; j < 34; j++) { dotTracker[j] = dots[j]; }
 }
 
 void drawLives(void) {
-    for (int8_t i=0; i<(lives); i++) {
+    int8_t i; //Arduino IDE not set for c99 by default; booo!
+    for (i=0; i<(lives); i++) {
         displayPixel(0, 33-(i*2), YELLOW);
     }
 }
 
 void drawScore(void) {
-    for (int8_t i=0; i<32; i++) {
+    int8_t i; //Arduino IDE not set for c99 by default; booo!
+    for (i=0; i<32; i++) {
         if (score & (1<<i)) { displayPixel(31, 33-i, WHITE); }
         else { displayPixel(31, 33-i, BLACK); }
     }
