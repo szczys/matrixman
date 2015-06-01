@@ -25,6 +25,8 @@ void initDisplay(void) {
     if (ren == nullptr) {
         printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
     }
+    
+    displayClear(BLACK);
 }
 
 void displayClear(uint8_t color) {
