@@ -19,20 +19,20 @@ The main branch is designed for Teensy 3.1 and can be compiled using the Arduino
 * [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html)
 * [Smartmatrix Library](https://github.com/pixelmatix/SmartMatrix)
 
-## Hardware Emulation Branch
+## Hardware Simulation Branch
 
-I actually coded most of this without the hardware in hand. To do so I wrote an emulator using SDL2. It's simply a grid of
+I actually coded most of this without the hardware in hand. To do so I wrote a simulator using SDL2. It's simply a grid of
 32x32 boxes that serves as a stand-in for the SmartMatrix. The game code itself is rather complex and this really sped up
 development time. Because of this I've kept the code in this repository abstracted so that game changes can easily be merged
 between branches.
 
-### To run the game emulator
+### To run the game simulator
 
 Install the SDL2 library:
 
 ```sudo apt-get install libsdl2-dev```
 
-Launch the emulator by typing `make`
+Launch the simulator by typing `make`
 
 ### To Merge Changes Between Branches
 
